@@ -3,36 +3,26 @@
 
 import tkinter.filedialog
 import os
+from util.json_settings import JSONSettings
+from competition.competition_loader import CompetitionLoader
+from util.error_collector import ErrorCollector
 
-class Main:
-    def open(self):
-        root = tkinter.Tk()
-        root.iconbitmap("util/icon.ico")
-        root.withdraw()
+def main():
+    root = tkinter.Tk()
+    root.iconbitmap("util/icon.ico")
+    root.withdraw()
 
-        folder = self.__read_last_path()
+    settings = JSONSettings("settings.json")
+
+    competition_loader = CompetitionLoader(settings)
+
+    folder = competition_loader.read_last_path()
+    if not folder:
+        folder = competition_loader.open_dialog(os.getcwd())
         if not folder:
-            folder = self.__open_folder_dialog(os.getcwd())
-
-        print(folder)
-        
-    def __read_last_path(self) -> str:
-        filename = ".last_competition"
-        
-        if not os.path.exists(filename):
-            print("Datei .last_competition exisitiert nicht.")
-            return None
-        
-        try:
-            with open(filename, "r", encoding="utf-8") as file:
-                return file.readline()
-        except IOError:
-            print("Fehler beim Lesen der Datei .last_competition.")
-            return None
-    
-    def __open_folder_dialog(self, initial_dir) -> str:
-        return tkinter.filedialog.askdirectory(initialdir=initial_dir, title="Ordner der Veranstaltung auswählen")
+            return
+    errors = ErrorCollector()
+    competition_loader.load(folder, errors)
 
 if __name__ == "__main__":
-    main = Main()
-    main.open()
+    main()

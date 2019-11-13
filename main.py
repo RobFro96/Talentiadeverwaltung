@@ -15,9 +15,7 @@ def main():
     root.iconbitmap(ICON_PATH)
     root.withdraw()
 
-    settings = JSONSettings(SETTINGS_FILE)
-
-    competition_loader = CompetitionLoader(settings)
+    competition_loader = CompetitionLoader()
 
     folder = competition_loader.read_last_path()
     if not folder:
@@ -25,7 +23,7 @@ def main():
         if not folder:
             return
     errors = ErrorCollector()
-    competition_loader.load(folder + "x", errors)
+    competition_loader.load(folder, errors)
     errors.show_messagebox()
 
 if __name__ == "__main__":

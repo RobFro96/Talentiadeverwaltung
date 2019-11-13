@@ -3,7 +3,7 @@ import tkinter
 
 from util.error_collector import (ErrorCollector, ErrorType, print_error,
                                   print_warning)
-from util.json_settings import JSONSettings
+from initialization.settings_table import SettingsTable
 
 LAST_COMP_FILE = ".last_competition"
 ERROR_1 = "Datei .last_competition exisitiert nicht."
@@ -13,8 +13,8 @@ ERROR_3 = "Angegebner Ordner %s existiert nicht."
 
 
 class CompetitionLoader:
-    def __init__(self, settings: JSONSettings):
-        self.settings = settings
+    def __init__(self):
+        pass
 
     def read_last_path(self) -> str:
         if not os.path.exists(LAST_COMP_FILE):
@@ -37,3 +37,7 @@ class CompetitionLoader:
         if not os.path.isdir(folder):
             errors.append(ErrorType.ERROR, ERROR_3 % folder)
             return None
+
+        settings_table = SettingsTable(folder)
+        settings_table.open(errors)
+        

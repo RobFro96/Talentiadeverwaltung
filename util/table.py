@@ -1,15 +1,40 @@
 import os
+import enum
+import numbers
 
 import openpyxl
 import tkinter.messagebox
 
 ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
+class ValueType(enum.IntEnum):
+    STRING = 0
+    NUMBER = 1
+    COLUMN_RANGE = 2
+
+class ColumnRange:
+    def __init__(self, start:str , end:str):
+        self.start = start
+        self.end = end
+    
+    def __repr__(self):
+        return "%s-%s" % (self.start, self.end)
+
+def create_column_range(string: str) -> ColumnRange:
+    splitted = string.split("-")
+
+    if len(splitted) != 2:
+        return None
+    
+    return ColumnRange(splitted[0], splitted[1])
+
 class Table:
     def __init__(self, folder, filename):
         self.folder = folder
         self.filename = filename
         self.path = os.path.join(folder, filename)
+        self.workbook: openpyxl.Workbook = []
+        self.worksheet: openpyxl.worksheet.worksheet.Worksheet = []
 
     def open(self) -> str:
         try:
@@ -50,3 +75,42 @@ class Table:
     
     def column_number_to_letter(self, col_number):
         return ALPHABET[col_number - 1]
+    
+    def get_value(self, cell: str, val_type: ValueType, default=None):
+        if val_type == ValueType.NUMBER:
+            return self.get_number(cell, default)
+        if val_type == ValueType.COLUMN_RANGE:
+            return self.get_col_range(cell, default)
+        if val_type == ValueType.STRING:
+            return self.get_string(cell, default)
+    
+    def get_number(self, cell:str, default=None):
+        if default is None:
+            default = 0
+        value = self.worksheet[cell].value
+
+        if isinstance(value, numbers.Number):
+            return value, True
+        else:
+            return default, False
+    
+    def get_col_range(self, cell:str, default=None):
+        if default is None:
+            default = ColumnRange("A", "A")
+        value = create_column_range(self.worksheet[cell].value)
+
+        if value is not None:
+            return value, True
+        else:
+            return default, False
+    
+    def get_string(self, cell:str, default=None):
+        if default is None:
+            default = ""
+        value = self.worksheet[cell].value
+
+        if value is not None:
+            return value, True
+        else:
+            return default, False
+

@@ -40,4 +40,6 @@ class CompetitionLoader:
 
         settings_table = SettingsTable(folder)
         settings_table.open(errors)
+
+        print(settings_table.settings)
         

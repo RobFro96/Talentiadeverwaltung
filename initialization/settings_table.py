@@ -13,15 +13,21 @@ SETTINGS = {
     "gender_male": {"cell": "B6", "type": ValueType.STRING},
     "gender_female": {"cell": "B7", "type": ValueType.STRING},
     "gender_any": {"cell": "B8", "type": ValueType.STRING},
-    "login_file": {"cell": "B11", "type": ValueType.STRING},
-    "login_worksheet": {"cell": "B12", "type": ValueType.NUMBER},
-    "login_first_row": {"cell": "B13", "type": ValueType.NUMBER},
-    "login_column_range": {"cell": "B14", "type": ValueType.COLUMN_RANGE},
+    "attendees_file": {"cell": "B11", "type": ValueType.STRING},
+    "attendees_worksheet": {"cell": "B12", "type": ValueType.NUMBER},
+    "attendees_header": {"cell": "B13", "type": ValueType.NUMBER},
+    "attendees_columns": {"cell": "B14", "type": ValueType.COLUMN_RANGE},
+    "attendees_required": {"cell": "B15", "type": ValueType.STRING_LIST}
 }
-ERROR_1 = "Fehler beim Lesen der Einstellungstabelle. In Zelle %s wird eine Zahl erwartet."
-ERROR_2 = "Fehler beim Lesen der Einstellungstabelle. In Zelle %s wird ein Spaltenbereich erwartet."
-ERROR_3 = "Fehler beim Lesen der Einstellungstabelle. Zelle %s ist leer."
 
+ERROR_OPENING = "Einstellungsdatei kann nicht geöffnet werden."
+
+VALUE_ERRORS = {
+    ValueType.NUMBER: "Fehler beim Lesen der Einstellungstabelle. In Zelle %s wird eine Zahl erwartet.",
+    ValueType.COLUMN_RANGE: "Fehler beim Lesen der Einstellungstabelle. In Zelle %s wird ein Spaltenbereich erwartet.",
+    ValueType.STRING: "Fehler beim Lesen der Einstellungstabelle. Zelle %s ist leer.",
+    ValueType.STRING_LIST: "Fehler beim Lesen der Einstellungstabelle. Zelle %s ist leer."
+}
 
 class SettingsTable(Table):
     def __init__(self, competition_folder: str):
@@ -31,8 +37,7 @@ class SettingsTable(Table):
     def open(self, errors: ErrorCollector):
         self.settings = {}
         if not Table.open(self):
-            errors.append(ErrorType.ERROR,
-                          "Einstellungsdatei kann nicht geöffnet werden.")
+            errors.append(ErrorType.ERROR, ERROR_OPENING)
             return
 
         self.__read_settings(errors)
@@ -45,12 +50,9 @@ class SettingsTable(Table):
                 value_property["cell"], value_property["type"])
 
             if not success:
-                if value_property["type"] == ValueType.NUMBER:
-                    errors.append(ErrorType.WARNING, ERROR_1 %
-                                  value_property["cell"])
-                elif value_property["type"] == ValueType.COLUMN_RANGE:
-                    errors.append(ErrorType.WARNING, ERROR_2 %
-                                  value_property["cell"])
-                elif value_property["type"] == ValueType.STRING:
-                    errors.append(ErrorType.WARNING, ERROR_3 %
-                                  value_property["cell"])
+                errors.append(ErrorType.WARNING, VALUE_ERRORS[value_property["type"]] % value_property["cell"])
+    
+    def __getitem__(self, key):
+        if key in self.settings:
+            return self.settings[key]
+        return None

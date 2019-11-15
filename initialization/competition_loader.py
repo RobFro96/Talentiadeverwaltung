@@ -4,6 +4,7 @@ import tkinter
 from util.error_collector import (ErrorCollector, ErrorType, print_error,
                                   print_warning)
 from initialization.settings_table import SettingsTable
+from database.attendees_table import AttendeesTable
 
 LAST_COMP_FILE = ".last_competition"
 ERROR_1 = "Datei .last_competition exisitiert nicht."
@@ -38,8 +39,12 @@ class CompetitionLoader:
             errors.append(ErrorType.ERROR, ERROR_3 % folder)
             return None
 
-        settings_table = SettingsTable(folder)
-        settings_table.open(errors)
+        settings = SettingsTable(folder)
+        settings.open(errors)
+        if errors.has_error():
+            return
+        
+        attendees_table = AttendeesTable(folder, settings)
+        attendees_table.open(errors)
 
-        print(settings_table.settings)
         

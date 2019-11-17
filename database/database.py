@@ -6,6 +6,7 @@ from util.error_collector import ErrorCollector
 CLUB = "Verein"
 LOGOUT = "Abmeldung"
 TOTAL = "Gesamt"
+SORT_CLUBS = True
 
 
 class Database:
@@ -25,6 +26,11 @@ class Database:
         if CLUB in row_data:
             if row_data[CLUB] not in self.clubs:
                 self.clubs.append(row_data[CLUB])
+                if SORT_CLUBS:
+                    self.clubs.sort()
+
+    def get_clubs(self):
+        return self.clubs
 
     def pack_club_table(self):
         data = {}
@@ -34,18 +40,23 @@ class Database:
             row = [0, 0, 0]
 
             row[0] = len(list(filter(lambda e, club=club:
-                                e[CLUB] == club,
-                                self.database)))
+                                     e[CLUB] == club,
+                                     self.database)))
             row[1] = len(list(filter(lambda e, club=club:
-                                e[CLUB] == club and e[LOGOUT] is not None,
-                                self.database)))
+                                     e[CLUB] == club and e[LOGOUT] is not None,
+                                     self.database)))
             row[2] = row[0] - row[1]
 
             data[club] = row
 
             for i in range(3):
                 total[i] += row[i]
-        
+
         data[TOTAL] = total
-        
+
         return data
+
+    def get_club_overview(self, club: str):
+        return list(filter(lambda e, club=club:
+                           e[CLUB] == club,
+                           self.database))

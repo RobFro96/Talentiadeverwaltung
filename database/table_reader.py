@@ -12,19 +12,20 @@ class TableReader:
     def __init__(self, table: Table, errors: ErrorCollector):
         self.table = table
         self.errors = errors
-        self.worksheet_number: int = 0
         self.header_row: int = 1
         self.columns: ColumnRange = None
         self.required_columns = []
 
-        self.worksheet: Worksheet = None
+        self.worksheet: Worksheet = self.table.workbook.worksheets[0]
         self.headers = []
 
-    def from_settings(self, settings: SettingsTable, prefix: str):
+    def from_settings(self, settings: SettingsTable, prefix: str, set_required=True):
         self.set_worksheet_number(settings[prefix + "_worksheet"])
         self.set_header_row(settings[prefix + "_header"])
         self.set_columns(settings[prefix + "_columns"])
-        self.set_required_columns(settings[prefix + "_required"])
+
+        if set_required:
+            self.set_required_columns(settings[prefix + "_required"])
 
         return self
 
@@ -33,8 +34,11 @@ class TableReader:
             self.errors.append(ErrorType.ERROR, ERROR_1 %
                                (number, self.table.filename))
         else:
-            self.worksheet_number = number - 1
+            self.worksheet = self.table.workbook.worksheets[number - 1]
         return self
+    
+    def set_worksheet(self, worksheet: Worksheet):
+        self.worksheet = worksheet
 
     def set_header_row(self, header_row: int):
         self.header_row = header_row
@@ -49,8 +53,6 @@ class TableReader:
         return self
 
     def read(self, line_callback: typing.Callable[[int, typing.Dict], None]):
-        self.worksheet = self.table.workbook.worksheets[self.worksheet_number]
-
         self.headers = self.__read_header()
 
         if not self.__required_columns_existing():
@@ -68,8 +70,8 @@ class TableReader:
             row += 1
 
     def __read_header(self):
-        return [str(self.worksheet.cell(self.header_row, col).value).strip() \
-            for col in self.columns.range()]
+        return [str(self.worksheet.cell(self.header_row, col).value).strip()
+                for col in self.columns.range()]
 
     def __read_row(self, row: int):
         row_data = {}
@@ -94,3 +96,21 @@ class TableReader:
                                    (header, self.table.filename))
                 return False
         return True
+
+    def write(self, data: typing.List[typing.Dict[str, typing.Any]]):
+        self.headers = self.__read_header()
+
+        row = self.header_row + 1
+
+        for row_data in data:
+            self.__write_row(row, row_data)
+            row += 1
+
+    def __write_row(self, row, row_data):
+        for i, header in enumerate(self.headers):
+            col = self.columns.id(i)
+
+            if header in row_data:
+                self.worksheet.cell(row, col).value = row_data[header]
+                if header == "Geburtstag":
+                    self.worksheet.cell(row, col).number_format = "DD.MM.YYYY"

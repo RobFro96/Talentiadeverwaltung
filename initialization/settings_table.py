@@ -1,9 +1,5 @@
-import os
-import enum
-from util.table import Table, ValueType
 from util.error_collector import ErrorCollector, ErrorType
-import openpyxl
-import numbers
+from util.table import Table, ValueType
 
 FILENAME = "Einstellungen.xlsx"
 WORKSHEET = 0
@@ -17,7 +13,13 @@ SETTINGS = {
     "attendees_worksheet": {"cell": "B12", "type": ValueType.NUMBER},
     "attendees_header": {"cell": "B13", "type": ValueType.NUMBER},
     "attendees_columns": {"cell": "B14", "type": ValueType.COLUMN_RANGE},
-    "attendees_required": {"cell": "B15", "type": ValueType.STRING_LIST}
+    "attendees_required": {"cell": "B15", "type": ValueType.STRING_LIST},
+    "clubs_template": {"cell": "B18", "type": ValueType.STRING},
+    "clubs_output": {"cell": "B19", "type": ValueType.STRING},
+    "clubs_worksheet": {"cell": "B20", "type": ValueType.NUMBER},
+    "clubs_header": {"cell": "B21", "type": ValueType.NUMBER},
+    "clubs_columns": {"cell": "B22", "type": ValueType.COLUMN_RANGE},
+    "clubs_cell_clubname": {"cell": "B23", "type": ValueType.STRING}
 }
 
 ERROR_OPENING = "Einstellungsdatei kann nicht geöffnet werden."
@@ -30,19 +32,20 @@ VALUE_ERRORS = {
 }
 
 class SettingsTable(Table):
-    def __init__(self, competition_folder: str):
+    def __init__(self, competition_folder: str, errors: ErrorCollector):
         Table.__init__(self, competition_folder, FILENAME)
         self.settings = {}
+        self.errors = errors
 
-    def open(self, errors: ErrorCollector):
+    def open(self):
         self.settings = {}
         if not Table.open(self):
-            errors.append(ErrorType.ERROR, ERROR_OPENING)
+            self.errors.append(ErrorType.ERROR, ERROR_OPENING)
             return
 
-        self.__read_settings(errors)
+        self.__read_settings()
 
-    def __read_settings(self, errors: ErrorCollector):
+    def __read_settings(self):
         self.worksheet = self.workbook.worksheets[WORKSHEET]
 
         for value_name, value_property in SETTINGS.items():
@@ -50,7 +53,7 @@ class SettingsTable(Table):
                 value_property["cell"], value_property["type"])
 
             if not success:
-                errors.append(ErrorType.WARNING, VALUE_ERRORS[value_property["type"]] % value_property["cell"])
+                self.errors.append(ErrorType.WARNING, VALUE_ERRORS[value_property["type"]] % value_property["cell"])
     
     def __getitem__(self, key):
         if key in self.settings:

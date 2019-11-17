@@ -69,6 +69,7 @@ class MainForm:
 
     def on_report_club(self, *_):
         print_info("Vereinsübersicht erstellen")
+        self.competition.on_report_club().show_messagebox()
 
     def on_report_group(self, *_):
         print_info("Riegenübersicht erstellen")

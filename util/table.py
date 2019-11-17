@@ -8,6 +8,7 @@ from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
 ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+CLOSE_WARNING = "Die Datei %s ist gerade von einem anderen Programm geöffnet. Jetzt schließen?"
 
 
 def column_letter_to_number(col_letter):
@@ -40,6 +41,9 @@ class ColumnRange:
 
     def range(self):
         return range(column_letter_to_number(self.start), column_letter_to_number(self.end) + 1)
+    
+    def id(self, i):
+        return column_letter_to_number(self.start) + i
 
 
 def create_column_range(string: str) -> ColumnRange:
@@ -86,8 +90,7 @@ class Table:
         path2 = os.path.join(folder, "~$" + filename)
 
         if os.path.exists(path1) or os.path.exists(path2):
-            tkinter.messagebox.showwarning(
-                "Warnung", "Die Datei " + filename + " ist gerade von einem anderen Programm geöffnet.")
+            tkinter.messagebox.showwarning("Warnung", CLOSE_WARNING % filename)
 
     def get_value(self, cell: str, val_type: ValueType, default=None):
         if val_type == ValueType.NUMBER:
@@ -106,8 +109,7 @@ class Table:
 
         if isinstance(value, numbers.Number):
             return value, True
-        else:
-            return default, False
+        return default, False
 
     def get_col_range(self, cell: str, default=None):
         if default is None:
@@ -116,8 +118,7 @@ class Table:
 
         if value is not None:
             return value, True
-        else:
-            return default, False
+        return default, False
 
     def get_string(self, cell: str, default=None):
         if default is None:
@@ -126,8 +127,7 @@ class Table:
 
         if value is not None:
             return str(value), True
-        else:
-            return default, False
+        return default, False
 
     def get_string_list(self, cell: str, default=None):
         if default is None:
@@ -137,5 +137,4 @@ class Table:
         if value is not None:
             str_list = [element.strip() for element in str(value).split(',')]
             return str_list, True
-        else:
-            return default, False
+        return default, False

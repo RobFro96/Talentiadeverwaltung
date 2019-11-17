@@ -5,6 +5,7 @@ from gui.gui_table import GuiTable
 
 TITLE = "Meldung"
 HEADERS = ["Verein", "Anmeldungen", "Abmeldungen", "Teilnehmer"]
+TOTAL = "Gesamt"
 
 class LoginTab:
     def __init__(self, main_form):
@@ -25,4 +26,4 @@ class LoginTab:
         self.tab.grid_columnconfigure(0, weight=1)
 
     def update_table(self, data):
-        self.club_table.update(data, {"Gesamt": ("bold",)})
+        self.club_table.update(data, {TOTAL: ("bold",)})

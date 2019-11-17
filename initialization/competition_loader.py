@@ -38,8 +38,8 @@ class CompetitionLoader:
             errors.append(ErrorType.ERROR, ERROR_3 % folder)
             return None
 
-        settings = SettingsTable(folder)
-        settings.open(errors)
+        settings = SettingsTable(folder, errors)
+        settings.open()
         if errors.has_error():
             return None
 
@@ -54,4 +54,4 @@ class CompetitionLoader:
         if errors.has_error():
             return None
 
-        return Competition(settings, database)
+        return Competition(folder, settings, database)

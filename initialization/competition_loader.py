@@ -1,10 +1,12 @@
 import os
 import tkinter
 
+from database.attendees_table import AttendeesTable
+from database.database import Database
+from initialization.competition import Competition
+from initialization.settings_table import SettingsTable
 from util.error_collector import (ErrorCollector, ErrorType, print_error,
                                   print_warning)
-from initialization.settings_table import SettingsTable
-from database.attendees_table import AttendeesTable
 
 LAST_COMP_FILE = ".last_competition"
 ERROR_1 = "Datei .last_competition exisitiert nicht."
@@ -14,9 +16,6 @@ ERROR_3 = "Angegebner Ordner %s existiert nicht."
 
 
 class CompetitionLoader:
-    def __init__(self):
-        pass
-
     def read_last_path(self) -> str:
         if not os.path.exists(LAST_COMP_FILE):
             print_warning(ERROR_1)
@@ -34,7 +33,7 @@ class CompetitionLoader:
             initialdir=initial_dir,
             title=FOLDER_DIALOG_TITLE)
 
-    def load(self, folder: str, errors: ErrorCollector):
+    def load(self, folder: str, errors: ErrorCollector) -> Competition:
         if not os.path.isdir(folder):
             errors.append(ErrorType.ERROR, ERROR_3 % folder)
             return None
@@ -42,9 +41,17 @@ class CompetitionLoader:
         settings = SettingsTable(folder)
         settings.open(errors)
         if errors.has_error():
-            return
-        
-        attendees_table = AttendeesTable(folder, settings)
-        attendees_table.open(errors)
+            return None
 
-        
+        database = Database()
+
+        attendees_table = AttendeesTable(folder, settings, errors)
+        attendees_table.open()
+        if errors.has_error():
+            return None
+
+        attendees_table.read_to_database(database, errors)
+        if errors.has_error():
+            return None
+
+        return Competition(settings, database)

@@ -1,9 +1,11 @@
-import os
 import enum
 import numbers
+import os
+import tkinter.messagebox
 
 import openpyxl
-import tkinter.messagebox
+from openpyxl.workbook import Workbook
+from openpyxl.worksheet.worksheet import Worksheet
 
 ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
@@ -54,8 +56,8 @@ class Table:
         self.folder = folder
         self.filename = filename
         self.path = os.path.join(folder, filename)
-        self.workbook: openpyxl.Workbook = []
-        self.worksheet: openpyxl.worksheet.worksheet.Worksheet = []
+        self.workbook: Workbook = []
+        self.worksheet: Worksheet = []
 
     def open(self) -> str:
         try:

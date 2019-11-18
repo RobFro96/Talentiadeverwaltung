@@ -43,7 +43,10 @@ class CompetitionLoader:
         if errors.has_error():
             return None
 
-        database = Database()
+        database = Database(settings)
+        settings.read_groups(database, errors)
+        if errors.has_error():
+            return None
 
         attendees_table = AttendeesTable(folder, settings, errors)
         attendees_table.open()
@@ -51,6 +54,10 @@ class CompetitionLoader:
             return None
 
         attendees_table.read_to_database(database, errors)
+        if errors.has_error():
+            return None
+
+        database.do_grouping(errors)
         if errors.has_error():
             return None
 

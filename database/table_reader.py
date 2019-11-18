@@ -1,6 +1,5 @@
 import typing
 
-from initialization.settings_table import SettingsTable
 from util.error_collector import ErrorCollector, ErrorType
 from util.table import ColumnRange, Table, Worksheet
 
@@ -19,7 +18,7 @@ class TableReader:
         self.worksheet: Worksheet = self.table.workbook.worksheets[0]
         self.headers = []
 
-    def from_settings(self, settings: SettingsTable, prefix: str, set_required=True):
+    def from_settings(self, settings, prefix: str, set_required=True):
         self.set_worksheet_number(settings[prefix + "_worksheet"])
         self.set_header_row(settings[prefix + "_header"])
         self.set_columns(settings[prefix + "_columns"])

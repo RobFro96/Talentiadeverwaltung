@@ -2,6 +2,7 @@ import enum
 import tkinter
 import tkinter.ttk
 
+from gui.age_tab import AgeTab
 from gui.login_tab import LoginTab
 from gui.menu import Menu
 from util.error_collector import print_info
@@ -43,6 +44,9 @@ class MainForm:
         self.login_tab = LoginTab(self)
         self.login_tab.create()
 
+        self.age_tab = AgeTab(self)
+        self.age_tab.create()
+
         self.__set_from_data()
 
         self.root.mainloop()
@@ -82,6 +86,9 @@ class MainForm:
 
     def on_scoring_create(self, *_):
         print_info("Auswertung erstellen")
-    
+
     def __set_from_data(self):
-        self.login_tab.update_table(self.competition.database.pack_club_table())
+        self.login_tab.update_table(
+            self.competition.database.pack_club_table())
+        self.age_tab.update_table(
+            self.competition.database.pack_age_table())

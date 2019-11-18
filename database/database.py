@@ -6,10 +6,15 @@ from util.error_collector import ErrorCollector, ErrorType
 
 ID = "ID"
 CLUB = "Verein"
+AGE = "Jahrgang"
 LOGOUT = "Abmeldung"
+GROUP = "Riege"
+GENDER = "Geschlecht"
+MALE = "m"
+FEMALE = "w"
+
 TOTAL = "Gesamt"
 SORT_CLUBS = True
-GROUP = "Riege"
 
 GROUP_NAME = "Riegenname"
 GROUP_AGE_CLASSES = "Altersklassen"
@@ -27,6 +32,7 @@ class Database:
 
         self.database: typing.List[typing.Dict[str, typing.Any]] = []
         self.clubs: typing.List[str] = []
+        self.ages: typing.List[int] = []
         self.groups: typing.List[typing.Dict[str, typing.Any]] = []
         self.errors: ErrorCollector = None
 
@@ -35,6 +41,7 @@ class Database:
     def read_attendees_table(self, table_reader: TableReader, errors: ErrorCollector):
         self.database = []
         self.clubs = []
+        self.ages = []
         self.errors = errors
         table_reader.read(self.__read_attendees_table_cb)
 
@@ -45,6 +52,10 @@ class Database:
                 self.clubs.append(row_data[CLUB])
                 if SORT_CLUBS:
                     self.clubs.sort()
+        if AGE in row_data:
+            if row_data[AGE] not in self.ages:
+                self.ages.append(row_data[AGE])
+                self.ages.sort()
 
     def get_clubs(self):
         return self.clubs
@@ -142,3 +153,29 @@ class Database:
                 return group[GROUP_NAME]
 
         return None
+
+    def pack_age_table(self):
+        data = {}
+        total = [0, 0, 0]
+
+        for age in self.ages:
+            row = [0, 0, 0]
+
+            row[0] = len(list(filter(lambda e, age=age:
+                                     e[AGE] == age and
+                                     e[GENDER].startswith(MALE),
+                                     self.get_attending())))
+            row[1] = len(list(filter(lambda e, age=age:
+                                     e[AGE] == age and
+                                     e[GENDER].startswith(FEMALE),
+                                     self.get_attending())))
+            row[2] = row[0] + row[1]
+
+            data[str(age)] = row
+
+            for i in range(3):
+                total[i] += row[i]
+
+        data[TOTAL] = total
+
+        return data

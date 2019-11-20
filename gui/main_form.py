@@ -3,6 +3,7 @@ import tkinter
 import tkinter.ttk
 
 from gui.age_tab import AgeTab
+from gui.group_tab import GroupTab
 from gui.login_tab import LoginTab
 from gui.menu import Menu
 from util.error_collector import print_info
@@ -26,6 +27,8 @@ class MainForm:
         self.exit_reason = ExitReason.EXIT
         self.menu: Menu = None
         self.login_tab: LoginTab = None
+        self.age_tab: AgeTab = None
+        self.group_tab: GroupTab = None
 
     def open(self, root: tkinter.Tk) -> ExitReason:
         self.root = root
@@ -46,6 +49,9 @@ class MainForm:
 
         self.age_tab = AgeTab(self)
         self.age_tab.create()
+
+        self.group_tab = GroupTab(self)
+        self.group_tab.create()
 
         self.__set_from_data()
 
@@ -77,9 +83,14 @@ class MainForm:
 
     def on_report_group(self, *_):
         print_info("Riegenübersicht erstellen")
+        self.competition.on_report_group().show_messagebox()
 
     def on_report_stations(self, *_):
         print_info("Stationsübersicht erstellen")
+        self.competition.on_report_stations().show_messagebox()
+
+    def on_create_value_tables(self, *_):
+        print_info("Wertetabellen erstellen")
 
     def on_scoring_refresh(self, *_):
         print_info("Auswertung aktualisieren")
@@ -92,3 +103,5 @@ class MainForm:
             self.competition.database.pack_club_table())
         self.age_tab.update_table(
             self.competition.database.pack_age_table())
+        self.group_tab.update_table(
+            self.competition.database.pack_group_table())

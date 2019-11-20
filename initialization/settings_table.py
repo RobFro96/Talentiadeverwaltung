@@ -21,7 +21,18 @@ SETTINGS = {
     "clubs_cell_clubname": {"cell": "B18", "type": ValueType.STRING},
     "age_classifier": {"cell": "B21", "type": ValueType.STRING},
     "group_sort_before": {"cell": "B22", "type": ValueType.STRING_LIST},
-    "group_sort_after": {"cell": "B23", "type": ValueType.STRING_LIST}
+    "group_sort_after": {"cell": "B23", "type": ValueType.STRING_LIST},
+    "groups_template": {"cell": "B26", "type": ValueType.STRING},
+    "groups_output": {"cell": "B27", "type": ValueType.STRING},
+    "groups_worksheet": {"cell": "B28", "type": ValueType.NUMBER},
+    "groups_header": {"cell": "B29", "type": ValueType.NUMBER},
+    "groups_columns": {"cell": "B30", "type": ValueType.COLUMN_RANGE},
+    "groups_cell_groupname": {"cell": "B31", "type": ValueType.STRING},
+    "stations_template": {"cell": "B34", "type": ValueType.STRING},
+    "stations_output": {"cell": "B35", "type": ValueType.STRING},
+    "stations_header": {"cell": "B36", "type": ValueType.NUMBER},
+    "stations_columns": {"cell": "B37", "type": ValueType.COLUMN_RANGE},
+    "stations_cell_groupname": {"cell": "B38", "type": ValueType.STRING},
 }
 
 ERROR_OPENING = "Einstellungsdatei kann nicht geöffnet werden."
@@ -37,6 +48,11 @@ GROUP_WORKSHEET = 2
 GROUP_HEADER = 2
 GROUP_COLUMNS = "A-C"
 GROUP_REQUIRED = ["Riegenname", "Altersklassen"]
+
+STATION_WORKSHEET = 3
+STATION_HEADER = 2
+STATION_COLUMNS = "A-B"
+STATION_REQUIRED = ["Station", "Kürzel"]
 
 
 class SettingsTable(Table):
@@ -77,3 +93,12 @@ class SettingsTable(Table):
             .set_required_columns(GROUP_REQUIRED)
 
         database.read_group_table(reader, errors)
+
+    def read_stations(self, database: Database, errors: ErrorCollector):
+        reader = TableReader(self, errors) \
+            .set_worksheet_number(STATION_WORKSHEET) \
+            .set_header_row(STATION_HEADER) \
+            .set_columns(create_column_range(STATION_COLUMNS)) \
+            .set_required_columns(STATION_REQUIRED)
+
+        database.read_station_table(reader, errors)

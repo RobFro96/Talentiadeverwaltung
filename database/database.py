@@ -21,6 +21,9 @@ GROUP_AGE_CLASSES = "Altersklassen"
 GROUP_LIMIT = "Maximalgröße"
 GROUP_SIZE = "Größe"
 
+STATION_NAME = "Station"
+STATION_SHORT = "Kürzel"
+
 AGE_CLASS_CREATE_ERROR = "Fehler beim Erstellen der Alterklasse des Sportlers mit der ID %d. Fehler: %s"
 NO_MATCH_WARN = "Den folgenden Sportlern konnte keine Riege zugeordnet werden: %s"
 
@@ -34,6 +37,7 @@ class Database:
         self.clubs: typing.List[str] = []
         self.ages: typing.List[int] = []
         self.groups: typing.List[typing.Dict[str, typing.Any]] = []
+        self.stations: typing.List[typing.Dict[str, typing.Any]] = []
         self.errors: ErrorCollector = None
 
         self.age_classifier: str = self.settings["age_classifier"]
@@ -179,3 +183,32 @@ class Database:
         data[TOTAL] = total
 
         return data
+
+    def pack_group_table(self):
+        data = {}
+        for group in self.groups:
+            row = []
+            row.append(group[GROUP_AGE_CLASSES])
+            row.append(group[GROUP_LIMIT] or "\u221E")
+            row.append(group[GROUP_SIZE])
+            data[group[GROUP_NAME]] = row
+        return data
+
+    def get_groups(self):
+        return self.groups
+
+    def get_group_overview(self, group):
+        return list(filter(lambda e, group=group:
+                           e[GROUP] == group[GROUP_NAME],
+                           self.database))
+
+    def read_station_table(self, table_reader: TableReader, errors: ErrorCollector):
+        self.stations = []
+        self.errors = errors
+        table_reader.read(self.__read_station_table_cb)
+
+    def __read_station_table_cb(self, row: int, row_data: typing.Dict[str, typing.Any]):
+        self.stations.append(row_data)
+
+    def get_stations(self):
+        return self.stations

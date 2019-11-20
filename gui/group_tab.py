@@ -3,12 +3,11 @@ import tkinter.ttk
 
 from gui.gui_table import GuiTable
 
-TITLE = "Meldung"
-HEADERS = ["Verein", "Anmeldungen", "Abmeldungen", "Teilnehmer"]
-TOTAL = "Gesamt"
+TITLE = "Riegenübersicht"
+HEADERS = ["Riege", "Altersklassen", "Maximalgröße", "Größe"]
 
 
-class LoginTab:
+class GroupTab:
     def __init__(self, main_form):
         from gui.main_form import MainForm
         self.main_form: MainForm = main_form
@@ -19,7 +18,7 @@ class LoginTab:
         self.tab = tkinter.ttk.Frame(self.main_form.notebook)
         self.main_form.notebook.add(self.tab, text=TITLE)
 
-        self.table = GuiTable(self.tab, HEADERS, [100]*4)
+        self.table = GuiTable(self.tab, HEADERS, [100, 200, 100, 100])
         self.table.grid(row=0, column=0, sticky="nsew")
         self.table.grid_vsb(row=0, column=1, sticky='nse')
 
@@ -27,4 +26,4 @@ class LoginTab:
         self.tab.grid_columnconfigure(0, weight=1)
 
     def update_table(self, data):
-        self.table.update(data, {TOTAL: ("bold",)})
+        self.table.update(data)

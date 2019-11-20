@@ -18,8 +18,10 @@ class TableReader:
         self.worksheet: Worksheet = self.table.workbook.worksheets[0]
         self.headers = []
 
-    def from_settings(self, settings, prefix: str, set_required=True):
-        self.set_worksheet_number(settings[prefix + "_worksheet"])
+    def from_settings(self, settings, prefix: str, set_required=True, set_worksheet=True):
+        if set_worksheet:
+            self.set_worksheet_number(settings[prefix + "_worksheet"])
+
         self.set_header_row(settings[prefix + "_header"])
         self.set_columns(settings[prefix + "_columns"])
 
@@ -35,7 +37,7 @@ class TableReader:
         else:
             self.worksheet = self.table.workbook.worksheets[number - 1]
         return self
-    
+
     def set_worksheet(self, worksheet: Worksheet):
         self.worksheet = worksheet
 

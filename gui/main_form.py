@@ -91,6 +91,7 @@ class MainForm:
 
     def on_create_value_tables(self, *_):
         print_info("Wertetabellen erstellen")
+        self.competition.on_report_values().show_messagebox()
 
     def on_scoring_refresh(self, *_):
         print_info("Auswertung aktualisieren")

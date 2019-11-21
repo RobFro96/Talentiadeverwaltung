@@ -33,6 +33,11 @@ SETTINGS = {
     "stations_header": {"cell": "B36", "type": ValueType.NUMBER},
     "stations_columns": {"cell": "B37", "type": ValueType.COLUMN_RANGE},
     "stations_cell_groupname": {"cell": "B38", "type": ValueType.STRING},
+    "values_template": {"cell": "B41", "type": ValueType.STRING},
+    "values_output": {"cell": "B42", "type": ValueType.STRING},
+    "values_header": {"cell": "B43", "type": ValueType.NUMBER},
+    "values_columns": {"cell": "B44", "type": ValueType.COLUMN_RANGE},
+    "values_cell_groupname": {"cell": "B45", "type": ValueType.STRING},
 }
 
 ERROR_OPENING = "Einstellungsdatei kann nicht geöffnet werden."

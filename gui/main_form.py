@@ -6,6 +6,7 @@ from gui.age_tab import AgeTab
 from gui.group_tab import GroupTab
 from gui.login_tab import LoginTab
 from gui.menu import Menu
+from gui.progress_task import ProgressTask
 from util.error_collector import print_info
 
 
@@ -91,7 +92,9 @@ class MainForm:
 
     def on_create_value_tables(self, *_):
         print_info("Wertetabellen erstellen")
-        self.competition.on_report_values().show_messagebox()
+        ProgressTask(self.root).start()
+
+        # self.competition.on_report_values().show_messagebox()
 
     def on_scoring_refresh(self, *_):
         print_info("Auswertung aktualisieren")

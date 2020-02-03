@@ -7,21 +7,9 @@ import openpyxl
 from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
-ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+from util.column_range import ColumnRange
+
 CLOSE_WARNING = "Die Datei %s ist gerade von einem anderen Programm geöffnet. Jetzt schließen?"
-
-
-def column_letter_to_number(col_letter):
-    if len(col_letter) == 1:
-        return ALPHABET.index(col_letter.upper()) + 1
-    else:
-        first_digit = ALPHABET.index(col_letter[0].upper()) + 1
-        second_digit = ALPHABET.index(col_letter[1].upper()) + 1
-        return first_digit * 26 + second_digit
-
-
-def column_number_to_letter(col_number):
-    return ALPHABET[col_number - 1]
 
 
 class ValueType(enum.IntEnum):
@@ -29,30 +17,7 @@ class ValueType(enum.IntEnum):
     NUMBER = 1
     COLUMN_RANGE = 2
     STRING_LIST = 3
-
-
-class ColumnRange:
-    def __init__(self, start: str, end: str):
-        self.start = start
-        self.end = end
-
-    def __repr__(self):
-        return "%s-%s" % (self.start, self.end)
-
-    def range(self):
-        return range(column_letter_to_number(self.start), column_letter_to_number(self.end) + 1)
-    
-    def id(self, i):
-        return column_letter_to_number(self.start) + i
-
-
-def create_column_range(string: str) -> ColumnRange:
-    splitted = string.split("-")
-
-    if len(splitted) != 2:
-        return None
-
-    return ColumnRange(splitted[0], splitted[1])
+    CELL = 4
 
 
 class Table:
@@ -113,8 +78,8 @@ class Table:
 
     def get_col_range(self, cell: str, default=None):
         if default is None:
-            default = ColumnRange("A", "A")
-        value = create_column_range(self.worksheet[cell].value)
+            default = ColumnRange.from_string("A-A")
+        value = ColumnRange.from_string(self.worksheet[cell].value)
 
         if value is not None:
             return value, True

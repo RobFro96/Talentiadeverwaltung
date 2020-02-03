@@ -1,7 +1,8 @@
 import typing
 
+from util.column_range import ColumnRange
 from util.error_collector import ErrorCollector, ErrorType
-from util.table import ColumnRange, Table, Worksheet
+from util.table import Table, Worksheet
 
 ERROR_1 = "Angegebes Tabellenblatt %d exisitert nicht in der Tabelle %s."
 ERROR_2 = "Pflichtspalte %s existiert nicht in der Tabelle %s."

@@ -1,7 +1,8 @@
 from database.database import Database
 from database.table_reader import TableReader
+from util.column_range import ColumnRange
 from util.error_collector import ErrorCollector, ErrorType
-from util.table import Table, ValueType, create_column_range
+from util.table import Table, ValueType
 
 FILENAME = "Einstellungen.xlsx"
 WORKSHEET = 0
@@ -94,7 +95,7 @@ class SettingsTable(Table):
         reader = TableReader(self, errors) \
             .set_worksheet_number(GROUP_WORKSHEET) \
             .set_header_row(GROUP_HEADER) \
-            .set_columns(create_column_range(GROUP_COLUMNS)) \
+            .set_columns(ColumnRange.from_string(GROUP_COLUMNS)) \
             .set_required_columns(GROUP_REQUIRED)
 
         database.read_group_table(reader, errors)
@@ -103,7 +104,7 @@ class SettingsTable(Table):
         reader = TableReader(self, errors) \
             .set_worksheet_number(STATION_WORKSHEET) \
             .set_header_row(STATION_HEADER) \
-            .set_columns(create_column_range(STATION_COLUMNS)) \
+            .set_columns(ColumnRange.from_string(STATION_COLUMNS)) \
             .set_required_columns(STATION_REQUIRED)
 
         database.read_station_table(reader, errors)

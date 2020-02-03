@@ -1,34 +1,34 @@
+import logging
+
 from database.database import GROUP_NAME, Database
 from database.table_reader import TableReader
 from initialization.settings_table import SettingsTable
-from util.error_collector import ErrorCollector, ErrorType
 from util.table import Table
 
-ERROR_OPENING = "Vorlage der Riegenübersicht %s kann nicht geöffnet werden."
-ERROR_SAVING = "Riegenübersicht %s konnte nicht gespeichert werden."
 WORKSHEET_TITLE = "Riege %s"
 
 
 class GroupReportTable(Table):
-    def __init__(self, competition_folder: str, settings: SettingsTable, errors: ErrorCollector):
+    def __init__(self, competition_folder: str, settings: SettingsTable):
         self.settings = settings
-        self.errors = errors
         self.table_reader: TableReader = None
         Table.__init__(self, competition_folder,
                        self.settings["groups_template"])
 
     def open(self):
         if not Table.open(self):
-            self.errors.append(ErrorType.ERROR, ERROR_OPENING % self.filename)
+            logging.error("Vorlage der Riegenübersicht %s kann nicht geöffnet werden.",
+                          self.filename)
             return
 
     def write(self):
         if not Table.write(self, None, self.settings["groups_output"]):
-            self.errors.append(ErrorType.ERROR, ERROR_SAVING % self.filename)
+            logging.error("Riegenübersicht %s konnte nicht gespeichert werden.",
+                          self.filename)
             return
 
-    def create(self, database: Database, errors: ErrorCollector):
-        self.table_reader = TableReader(self, errors).from_settings(
+    def create(self, database: Database):
+        self.table_reader = TableReader(self).from_settings(
             self.settings, "groups", False)
 
         for group in database.get_groups():

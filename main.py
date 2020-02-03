@@ -1,15 +1,23 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
+import logging
 import os
 import tkinter.filedialog
 
+import coloredlogs
+
 from gui.main_form import ExitReason
 from initialization.competition_loader import CompetitionLoader
-from util.error_collector import ErrorCollector
+
+coloredlogs.install(fmt='%(asctime)s,%(msecs)d %(levelname)-5s '
+                    '[%(filename)s:%(lineno)d] %(message)s',
+                    datefmt='%Y-%m-%d:%H:%M:%S',
+                    level=logging.DEBUG)
 
 ICON_PATH = "util/icon.ico"
 SETTINGS_FILE = "settings.json"
+
 
 def main(force_open=False):
     root = tkinter.Tk()
@@ -24,9 +32,7 @@ def main(force_open=False):
         if not folder:
             return
 
-    errors = ErrorCollector()
-    competition = competition_loader.load(folder, errors)
-    errors.show_messagebox()
+    competition = competition_loader.load(folder)
     if competition is None:
         return
 
@@ -35,6 +41,7 @@ def main(force_open=False):
         main(True)
     elif reason == ExitReason.REFRESH:
         main()
+
 
 if __name__ == "__main__":
     main()

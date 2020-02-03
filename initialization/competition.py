@@ -1,3 +1,4 @@
+import logging
 import tkinter
 
 from database.database import Database
@@ -7,11 +8,7 @@ from reports.club_report_table import ClubReportTable
 from reports.group_report_table import GroupReportTable
 from reports.station_report_table import StationReportTable
 from reports.values_report_table import ValuesReportTable
-from util.error_collector import ErrorCollector, ErrorType
-
-CLUBS_SAVED = "Vereinsübersicht wurde erfolgreich erstellt."
-GROUPS_SAVED = "Riegenübersicht wurde erfolgreich erstellt."
-STATIONS_SAVED = "Stationszettel wurde erfolgreich erstellt."
+from util.error_collector import ErrorCollector
 
 
 class Competition:
@@ -29,72 +26,76 @@ class Competition:
         return self.settings["competition_name"]
 
     def on_report_club(self) -> ErrorCollector:
-        errors = ErrorCollector()
+        ec = ErrorCollector()
 
-        table = ClubReportTable(self.folder, self.settings, errors)
+        table = ClubReportTable(self.folder, self.settings)
         table.open()
-        if errors.has_error():
-            return errors
+        if ec.has_error():
+            return ec
 
-        table.create(self.database, errors)
-        if errors.has_error():
-            return errors
+        table.create(self.database)
+        if ec.has_error():
+            return ec
 
         table.write()
-        if not errors.has_error():
-            errors.append(ErrorType.NONE, CLUBS_SAVED)
+        if ec.has_error():
+            return ec
 
-        return errors
+        logging.info("Vereinsübersicht wurde erfolgreich erstellt.")
+        return ec
 
     def on_report_group(self) -> ErrorCollector:
-        errors = ErrorCollector()
+        ec = ErrorCollector()
 
-        table = GroupReportTable(self.folder, self.settings, errors)
+        table = GroupReportTable(self.folder, self.settings)
         table.open()
-        if errors.has_error():
-            return errors
+        if ec.has_error():
+            return ec
 
-        table.create(self.database, errors)
-        if errors.has_error():
-            return errors
+        table.create(self.database)
+        if ec.has_error():
+            return ec
 
         table.write()
-        if not errors.has_error():
-            errors.append(ErrorType.NONE, GROUPS_SAVED)
+        if ec.has_error():
+            return ec
 
-        return errors
+        logging.info("Riegenübersicht wurde erfolgreich erstellt.")
+        return ec
 
     def on_report_stations(self) -> ErrorCollector:
-        errors = ErrorCollector()
+        ec = ErrorCollector()
 
-        table = StationReportTable(self.folder, self.settings, errors)
+        table = StationReportTable(self.folder, self.settings)
         table.open()
-        if errors.has_error():
-            return errors
+        if ec.has_error():
+            return ec
 
-        table.create(self.database, errors)
-        if errors.has_error():
-            return errors
+        table.create(self.database)
+        if ec.has_error():
+            return ec
 
         table.write()
-        if not errors.has_error():
-            errors.append(ErrorType.NONE, STATIONS_SAVED)
+        if ec.has_error():
+            return ec
 
-        return errors
+        logging.info("Stationszettel wurde erfolgreich erstellt.")
+        return ec
 
     def on_report_values(self) -> ErrorCollector:
-        errors = ErrorCollector()
+        ec = ErrorCollector()
 
         for station in self.database.get_stations():
             for group in self.database.get_groups():
-                table = ValuesReportTable(self.folder, self.settings, errors)
+                table = ValuesReportTable(self.folder, self.settings)
                 table.open()
-                table.create(self.database, errors, station, group)
+                table.create(self.database, station, group)
                 table.write()
-                if errors.has_error():
+                if ec.has_error():
                     return
 
-        if not errors.has_error():
-            errors.append(ErrorType.NONE, STATIONS_SAVED)
+        if ec.has_error():
+            return ec
 
-        return errors
+        logging.info("Wertungszettel wurden erfolgreich erstellt.")
+        return ec

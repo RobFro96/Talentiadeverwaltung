@@ -1,7 +1,8 @@
+import logging
+
 from database.database import Database
 from database.table_reader import TableReader
 from util.column_range import ColumnRange
-from util.error_collector import ErrorCollector, ErrorType
 from util.table import Table, ValueType
 
 FILENAME = "Einstellungen.xlsx"
@@ -41,8 +42,6 @@ SETTINGS = {
     "values_cell_groupname": {"cell": "B45", "type": ValueType.STRING},
 }
 
-ERROR_OPENING = "Einstellungsdatei kann nicht geöffnet werden."
-
 VALUE_ERRORS = {
     ValueType.NUMBER: "Fehler beim Lesen der Einstellungstabelle. In Zelle %s wird eine Zahl erwartet.",
     ValueType.COLUMN_RANGE: "Fehler beim Lesen der Einstellungstabelle. In Zelle %s wird ein Spaltenbereich erwartet.",
@@ -62,15 +61,14 @@ STATION_REQUIRED = ["Station", "Kürzel"]
 
 
 class SettingsTable(Table):
-    def __init__(self, competition_folder: str, errors: ErrorCollector):
+    def __init__(self, competition_folder: str):
         Table.__init__(self, competition_folder, FILENAME)
         self.settings = {}
-        self.errors = errors
 
     def open(self):
         self.settings = {}
         if not Table.open(self):
-            self.errors.append(ErrorType.ERROR, ERROR_OPENING)
+            logging.error("Einstellungsdatei kann nicht geöffnet werden.")
             return
 
         self.__read_settings()
@@ -83,28 +81,28 @@ class SettingsTable(Table):
                 value_property["cell"], value_property["type"])
 
             if not success:
-                self.errors.append(
-                    ErrorType.WARNING, VALUE_ERRORS[value_property["type"]] % value_property["cell"])
+                logging.error(VALUE_ERRORS[value_property["type"]],
+                              value_property["cell"])
 
     def __getitem__(self, key):
         if key in self.settings:
             return self.settings[key]
         return None
 
-    def read_groups(self, database: Database, errors: ErrorCollector):
-        reader = TableReader(self, errors) \
+    def read_groups(self, database: Database):
+        reader = TableReader(self) \
             .set_worksheet_number(GROUP_WORKSHEET) \
             .set_header_row(GROUP_HEADER) \
             .set_columns(ColumnRange.from_string(GROUP_COLUMNS)) \
             .set_required_columns(GROUP_REQUIRED)
 
-        database.read_group_table(reader, errors)
+        database.read_group_table(reader)
 
-    def read_stations(self, database: Database, errors: ErrorCollector):
-        reader = TableReader(self, errors) \
+    def read_stations(self, database: Database):
+        reader = TableReader(self) \
             .set_worksheet_number(STATION_WORKSHEET) \
             .set_header_row(STATION_HEADER) \
             .set_columns(ColumnRange.from_string(STATION_COLUMNS)) \
             .set_required_columns(STATION_REQUIRED)
 
-        database.read_station_table(reader, errors)
+        database.read_station_table(reader)

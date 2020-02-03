@@ -1,36 +1,35 @@
+import logging
+
 from database.database import GROUP_NAME, STATION_SHORT, Database
 from database.table_reader import TableReader
 from initialization.settings_table import SettingsTable
-from util.error_collector import ErrorCollector, ErrorType
 from util.table import Table
-
-ERROR_OPENING = "Vorlage der Wertetabellen %s kann nicht geöffnet werden."
-ERROR_SAVING = "Wertetabelle %s konnte nicht gespeichert werden."
 
 
 class ValuesReportTable(Table):
-    def __init__(self, competition_folder: str, settings: SettingsTable, errors: ErrorCollector):
+    def __init__(self, competition_folder: str, settings: SettingsTable):
         self.settings = settings
-        self.errors = errors
         self.table_reader: TableReader = None
         Table.__init__(self, competition_folder,
                        self.settings["values_template"])
 
     def open(self):
         if not Table.open(self):
-            self.errors.append(ErrorType.ERROR, ERROR_OPENING % self.filename)
+            logging.error("Vorlage der Wertetabellen %s kann nicht geöffnet werden.",
+                          self.filename)
             return
 
     def write(self):
         if not Table.write(self, None, None):
-            self.errors.append(ErrorType.ERROR, ERROR_SAVING % self.filename)
+            logging.error("Wertetabelle %s konnte nicht gespeichert werden.",
+                          self.filename)
             return
 
-    def create(self, database: Database, errors: ErrorCollector, station, group):
+    def create(self, database: Database, station, group):
         self.filename = self.settings["values_output"] % (
             station[STATION_SHORT], group[GROUP_NAME])
 
-        self.table_reader = TableReader(self, errors).from_settings(
+        self.table_reader = TableReader(self).from_settings(
             self.settings, "values", False, False)
 
         self.__create_worksheet(station, group, database)

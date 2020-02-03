@@ -1,8 +1,8 @@
+import logging
 import re
 import typing
 
 from database.table_reader import TableReader
-from util.error_collector import ErrorCollector, ErrorType
 
 ID = "ID"
 CLUB = "Verein"
@@ -24,9 +24,6 @@ GROUP_SIZE = "Größe"
 STATION_NAME = "Station"
 STATION_SHORT = "Kürzel"
 
-AGE_CLASS_CREATE_ERROR = "Fehler beim Erstellen der Alterklasse des Sportlers mit der ID %d. Fehler: %s"
-NO_MATCH_WARN = "Den folgenden Sportlern konnte keine Riege zugeordnet werden: %s"
-
 
 class Database:
     def __init__(self, settings):
@@ -38,15 +35,13 @@ class Database:
         self.ages: typing.List[int] = []
         self.groups: typing.List[typing.Dict[str, typing.Any]] = []
         self.stations: typing.List[typing.Dict[str, typing.Any]] = []
-        self.errors: ErrorCollector = None
 
         self.age_classifier: str = self.settings["age_classifier"]
 
-    def read_attendees_table(self, table_reader: TableReader, errors: ErrorCollector):
+    def read_attendees_table(self, table_reader: TableReader):
         self.database = []
         self.clubs = []
         self.ages = []
-        self.errors = errors
         table_reader.read(self.__read_attendees_table_cb)
 
     def __read_attendees_table_cb(self, row: int, row_data: typing.Dict[str, typing.Any]):
@@ -93,9 +88,8 @@ class Database:
                            e[CLUB] == club,
                            self.database))
 
-    def read_group_table(self, table_reader: TableReader, errors: ErrorCollector):
+    def read_group_table(self, table_reader: TableReader):
         self.groups = []
-        self.errors = errors
         table_reader.read(self.__read_group_table_cb)
 
     def __read_group_table_cb(self, row: int, row_data: typing.Dict[str, typing.Any]):
@@ -106,14 +100,13 @@ class Database:
 
         try:
             age_class = eval(self.age_classifier)
-        except Exception as e:
-            self.errors.append(
-                ErrorType.ERROR, AGE_CLASS_CREATE_ERROR % (attendee["ID"], str(e)))
+        except:
+            logging.exception(
+                "Fehler beim Erstellen der Alterklasse des Sportlers mit der ID %d.", attendee["ID"])
 
         return age_class
 
-    def do_grouping(self, errors: ErrorCollector):
-        self.errors = errors
+    def do_grouping(self):
         self.sort_attendees(self.settings["group_sort_before"])
         self.__grouping_clear()
 
@@ -126,8 +119,8 @@ class Database:
         self.sort_attendees(self.settings["group_sort_after"])
 
         if no_matchs:
-            self.errors.append(ErrorType.WARNING, NO_MATCH_WARN %
-                               (", ".join(no_matchs)))
+            logging.warning("Den folgenden Sportlern konnte keine Riege zugeordnet werden: %s",
+                            ", ".join(no_matchs))
 
     def get_attending(self):
         return list(filter(lambda e: e[LOGOUT] is None, self.database))
@@ -202,9 +195,8 @@ class Database:
                            e[GROUP] == group[GROUP_NAME],
                            self.database))
 
-    def read_station_table(self, table_reader: TableReader, errors: ErrorCollector):
+    def read_station_table(self, table_reader: TableReader):
         self.stations = []
-        self.errors = errors
         table_reader.read(self.__read_station_table_cb)
 
     def __read_station_table_cb(self, row: int, row_data: typing.Dict[str, typing.Any]):

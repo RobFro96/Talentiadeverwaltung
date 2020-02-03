@@ -1,17 +1,13 @@
+import logging
 import typing
 
 from util.column_range import ColumnRange
-from util.error_collector import ErrorCollector, ErrorType
 from util.table import Table, Worksheet
-
-ERROR_1 = "Angegebes Tabellenblatt %d exisitert nicht in der Tabelle %s."
-ERROR_2 = "Pflichtspalte %s existiert nicht in der Tabelle %s."
 
 
 class TableReader:
-    def __init__(self, table: Table, errors: ErrorCollector):
+    def __init__(self, table: Table):
         self.table = table
-        self.errors = errors
         self.header_row: int = 1
         self.columns: ColumnRange = None
         self.required_columns = []
@@ -33,8 +29,8 @@ class TableReader:
 
     def set_worksheet_number(self, number: int):
         if number > len(self.table.workbook.worksheets):
-            self.errors.append(ErrorType.ERROR, ERROR_1 %
-                               (number, self.table.filename))
+            logging.error("Angegebes Tabellenblatt %d exisitert nicht in der Tabelle %s.",
+                          number, self.table.filename)
         else:
             self.worksheet = self.table.workbook.worksheets[number - 1]
         return self
@@ -94,8 +90,8 @@ class TableReader:
     def __required_columns_existing(self):
         for header in self.required_columns:
             if not header in self.headers:
-                self.errors.append(ErrorType.ERROR, ERROR_2 %
-                                   (header, self.table.filename))
+                logging.error("Pflichtspalte %s existiert nicht in der Tabelle %s.",
+                              header, self.table.filename)
                 return False
         return True
 

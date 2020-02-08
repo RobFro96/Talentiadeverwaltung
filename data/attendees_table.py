@@ -1,7 +1,7 @@
 import logging
 
 from data.database import Database
-from data.table_reader import TableReader
+from util.table_reader import TableReader
 from initialization.settings_table import SettingsTable
 from util.table import Table
 

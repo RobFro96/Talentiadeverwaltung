@@ -3,7 +3,7 @@ import logging
 from data.database import Database
 from data.database_groups import GROUP_NAME
 from data.database_stations import STATION_SHORT
-from data.table_reader import TableReader
+from util.table_reader import TableReader
 from gui.progress_task import ProgressTask
 from initialization.settings_table import SettingsTable
 from util.table import Table

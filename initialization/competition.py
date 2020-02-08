@@ -1,5 +1,6 @@
 import logging
 import tkinter
+import typing
 
 from data.database import Database
 from gui.main_form import ExitReason, MainForm
@@ -9,6 +10,7 @@ from reports.club_report_table import ClubReportTable
 from reports.group_report_table import GroupReportTable
 from reports.station_report_table import StationReportTable
 from reports.values_report_table import ValuesReportTable
+from scoring.values_input_table import ValuesInputTable
 from util.error_collector import ErrorCollector
 
 
@@ -93,3 +95,28 @@ class Competition:
 
         logging.info("Wertungszettel wurden erfolgreich erstellt.")
         return errors
+
+    def on_scoring_refresh(self, progress: ProgressTask = None) -> (ErrorCollector, typing.List):
+        errors = ErrorCollector()
+        matrix = []
+
+        for station in self.database.get_stations():
+            matrix_line = []
+            for group in self.database.get_groups():
+                table = ValuesInputTable(self.folder, self.settings, self.database, station, group)
+                if table.file_exists():
+                    table.open()
+                else:
+                    table.status = logging.ERROR
+
+                if progress:
+                    progress.inc_value()
+
+                matrix_line.append(table.status)
+            matrix.append(matrix_line)
+
+        if errors.has_error():
+            return errors
+
+        logging.info("Wertungszettel wurden erfolgreich eingelesen.")
+        return errors, matrix

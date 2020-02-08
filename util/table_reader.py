@@ -53,6 +53,9 @@ class TableReader:
             value = self.table.worksheet.cell(row, col).value
             header = self.headers[i]
 
+            if header == str(None):
+                continue
+
             if isinstance(value, str):
                 value = value.strip()
 

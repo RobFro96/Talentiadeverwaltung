@@ -1,9 +1,9 @@
 import logging
 
 from data.database import Database
-from data.table_reader import TableReader
 from util.column_range import ColumnRange
 from util.table import Table, ValueType
+from util.table_reader import TableReader
 
 FILENAME = "Einstellungen.xlsx"
 WORKSHEET = 0
@@ -39,6 +39,11 @@ SETTINGS = {
     "values_header": {"cell": "B42", "type": ValueType.NUMBER},
     "values_columns": {"cell": "B43", "type": ValueType.COLUMN_RANGE},
     "values_cell_groupname": {"cell": "B44", "type": ValueType.STRING},
+    "values_input_file": {"cell": "B47", "type": ValueType.STRING},
+    "values_input_header": {"cell": "B48", "type": ValueType.NUMBER},
+    "values_input_columns": {"cell": "B49", "type": ValueType.COLUMN_RANGE},
+    "values_input_required": {"cell": "B50", "type": ValueType.STRING_LIST},
+    "values_input_non_value_columns": {"cell": "B51", "type": ValueType.STRING_LIST}
 }
 
 GROUP_WORKSHEET = 1

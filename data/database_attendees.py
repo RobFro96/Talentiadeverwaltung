@@ -113,3 +113,18 @@ class DatabaseAttendees:
         data[TOTAL] = total
 
         return data
+
+    def filter_attendee(self, row_data, required):
+        def filter_func(attendee):
+            for prop in required:
+                if prop not in attendee:
+                    return
+                if attendee[prop] != row_data[prop]:
+                    return False
+            return True
+
+        result = list(filter(filter_func, self.attendees))
+
+        if len(result) != 1:
+            return None
+        return result[0]

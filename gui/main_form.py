@@ -20,6 +20,7 @@ class ExitReason(enum.Enum):
 TITLE = "Talentiadeverwaltung [%s]"
 STATION_REPORT_PROGRESS_LABEL = "Stationsübersicht wird erstellt."
 VALUE_TABLES_PROGRESS_LABEL = "Wertetabellen werden erstellt."
+REFRESH_SCORING_PROGRESS_LABEL = "Wertetabellen werden eingelesen."
 
 
 class MainForm:
@@ -93,8 +94,7 @@ class MainForm:
         logging.info("Stationsübersicht erstellen")
         progress = ProgressTask(self.root)
         progress.set_label(STATION_REPORT_PROGRESS_LABEL)
-        progress.set_maximum((len(self.competition.database.get_stations()) + 1)
-                             * len(self.competition.database.get_groups()))
+        progress.set_maximum(self.competition.database.get_process_steps(0, 1))
 
         def process():
             errors = self.competition.on_report_stations(progress)
@@ -107,8 +107,7 @@ class MainForm:
         logging.info("Wertetabellen erstellen")
         progress = ProgressTask(self.root)
         progress.set_label(VALUE_TABLES_PROGRESS_LABEL)
-        progress.set_maximum(len(self.competition.database.get_stations())
-                             * len(self.competition.database.get_groups()))
+        progress.set_maximum(self.competition.database.get_process_steps())
 
         def process():
             errors = self.competition.on_report_values(progress)
@@ -119,6 +118,16 @@ class MainForm:
 
     def on_scoring_refresh(self, *_):
         logging.info("Auswertung aktualisieren")
+        progress = ProgressTask(self.root)
+        progress.set_label(REFRESH_SCORING_PROGRESS_LABEL)
+        progress.set_maximum(self.competition.database.get_process_steps())
+
+        def process():
+            errors, matrix = self.competition.on_scoring_refresh(progress)
+            progress.close()
+            errors.show_messagebox()
+
+        threading.Thread(target=process).start()
 
     def on_scoring_create(self, *_):
         logging.info("Auswertung erstellen")

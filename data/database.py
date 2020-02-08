@@ -71,3 +71,6 @@ class Database(DatabaseGroups, DatabaseStations, DatabaseAttendees):
         return list(filter(lambda e, group=group:
                            e[GROUP] == group[GROUP_NAME],
                            self.attendees))
+
+    def get_process_steps(self, extra_groups=0, extra_stations=0):
+        return (len(self.groups) + extra_groups) * (len(self.stations) + extra_stations)

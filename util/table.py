@@ -33,6 +33,9 @@ class Table:
     def get_path(self):
         return os.path.join(self.folder, self.filename)
 
+    def file_exists(self):
+        return os.path.isfile(self.get_path())
+
     def open(self) -> bool:
         try:
             self.workbook = openpyxl.open(self.get_path())

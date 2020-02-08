@@ -25,6 +25,8 @@ class ErrorCollector(logging.Handler):
         return self.global_state >= logging.ERROR
 
     def show_messagebox(self):
+        self.remove()
+
         if not self.entries:
             return
 
@@ -48,7 +50,9 @@ class ErrorCollector(logging.Handler):
             elif entry.levelno == logging.ERROR:
                 text += ERROR_MBOX_PREFIX
 
-            text += entry.msg
+            text += str(entry.msg) % entry.args
 
         mbox(title, text)
+
+    def remove(self):
         logging.getLogger().removeHandler(self)

@@ -1,53 +1,52 @@
 import logging
 
-from database.database import GROUP_NAME, STATION_SHORT, Database
-from database.table_reader import TableReader
+from data.database import Database
+from data.database_groups import GROUP_NAME
+from data.database_stations import STATION_SHORT
+from data.table_reader import TableReader
+from gui.progress_task import ProgressTask
 from initialization.settings_table import SettingsTable
 from util.table import Table
 
 
 class StationReportTable(Table):
-    def __init__(self, competition_folder: str, settings: SettingsTable):
+    def __init__(self, competition_folder: str, settings: SettingsTable, database: Database,
+                 progress: ProgressTask = None):
         self.settings = settings
+        self.database = database
+        self.progress = progress
         self.table_reader: TableReader = None
+
         Table.__init__(self, competition_folder,
                        self.settings["stations_template"])
 
-    def open(self):
-        if not Table.open(self):
-            logging.error("Vorlage der Stationszettel %s kann nicht geöffnet werden.",
-                          self.filename)
-            return
+    def write(self, folder=None, filename=None) -> bool:
+        filename = filename or self.settings["stations_output"]
 
-    def write(self):
-        if not Table.write(self, None, self.settings["stations_output"]):
-            logging.error("Stationszettel %s konnte nicht gespeichert werden.",
-                          self.filename)
-            return
+        try:
+            self.table_reader = TableReader.from_settings(self, self.settings, "groups")
+            for station in self.database.get_stations():
+                for group in self.database.get_groups():
+                    self.__create_worksheet(station, group)
 
-    def create(self, database: Database):
-        self.table_reader = TableReader(self).from_settings(
-            self.settings, "stations", False, False)
+                    if self.progress:
+                        self.progress.inc_value()
 
-        for station in database.get_stations():
-            for group in database.get_groups():
-                self.__create_worksheet(station, group, database)
+            for station in self.database.get_stations():
+                self.remove_worksheet(station[STATION_SHORT])
+                if self.progress:
+                    self.progress.inc_value()
 
-        for station in database.get_stations():
-            self.workbook.remove_sheet(self.__get_template_sheet(station))
+            return Table.write(self, folder, filename)
+        except:
+            logging.exception("Fehler beim Erstellen der Stationsübersicht.")
+            return False
 
-    def __create_worksheet(self, station, group, database: Database):
-        self.worksheet = self.workbook.copy_worksheet(
-            self.__get_template_sheet(station))
-        self.worksheet.title = "%s-%s" % (
-            station[STATION_SHORT], str(group[GROUP_NAME]))
-        self.table_reader.set_worksheet(self.worksheet)
+    def __create_worksheet(self, station, group):
+        self.copy_worksheet(station[STATION_SHORT])
+        self.worksheet.title = "%s-%s" % (station[STATION_SHORT], str(group[GROUP_NAME]))
 
-        data = database.get_group_overview(group)
+        data = self.database.get_group_overview(group)
         self.table_reader.write(data)
 
-        self.worksheet[self.settings["stations_cell_groupname"]
-                       ].value = str(group[GROUP_NAME])
-
-    def __get_template_sheet(self, station):
-        return self.workbook[station[STATION_SHORT]]
+        self.set_value(self.settings["stations_cell_groupname"], str(group[GROUP_NAME]))

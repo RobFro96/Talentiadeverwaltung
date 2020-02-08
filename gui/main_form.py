@@ -1,5 +1,6 @@
 import enum
 import logging
+import threading
 import tkinter
 import tkinter.ttk
 
@@ -17,6 +18,8 @@ class ExitReason(enum.Enum):
 
 
 TITLE = "Talentiadeverwaltung [%s]"
+STATION_REPORT_PROGRESS_LABEL = "Stationsübersicht wird erstellt."
+VALUE_TABLES_PROGRESS_LABEL = "Wertetabellen werden erstellt."
 
 
 class MainForm:
@@ -88,13 +91,31 @@ class MainForm:
 
     def on_report_stations(self, *_):
         logging.info("Stationsübersicht erstellen")
-        self.competition.on_report_stations().show_messagebox()
+        progress = ProgressTask(self.root)
+        progress.set_label(STATION_REPORT_PROGRESS_LABEL)
+        progress.set_maximum((len(self.competition.database.get_stations()) + 1)
+                             * len(self.competition.database.get_groups()))
+
+        def process():
+            errors = self.competition.on_report_stations(progress)
+            progress.close()
+            errors.show_messagebox()
+
+        threading.Thread(target=process).start()
 
     def on_create_value_tables(self, *_):
         logging.info("Wertetabellen erstellen")
-        ProgressTask(self.root).start()
+        progress = ProgressTask(self.root)
+        progress.set_label(VALUE_TABLES_PROGRESS_LABEL)
+        progress.set_maximum(len(self.competition.database.get_stations())
+                             * len(self.competition.database.get_groups()))
 
-        # self.competition.on_report_values().show_messagebox()
+        def process():
+            errors = self.competition.on_report_values(progress)
+            progress.close()
+            errors.show_messagebox()
+
+        threading.Thread(target=process).start()
 
     def on_scoring_refresh(self, *_):
         logging.info("Auswertung aktualisieren")

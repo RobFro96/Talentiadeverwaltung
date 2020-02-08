@@ -2,8 +2,8 @@ import logging
 import os
 import tkinter
 
-from database.attendees_table import AttendeesTable
-from database.database import Database
+from data.attendees_table import AttendeesTable
+from data.database import Database
 from initialization.competition import Competition
 from initialization.settings_table import SettingsTable
 from util.error_collector import ErrorCollector
@@ -31,39 +31,38 @@ class CompetitionLoader:
             title=FOLDER_DIALOG_TITLE)
 
     def load(self, folder: str) -> Competition:
+        errors = ErrorCollector()
+
+        # Ordner überprüfen
         if not os.path.isdir(folder):
             logging.error("Angegebner Ordner %s existiert nicht.", folder)
             return None
 
-        ec = ErrorCollector()
-
+        # Einstellungen lesen
         settings = SettingsTable(folder)
         settings.open()
-        if ec.has_error():
-            ec.show_messagebox()
+        if errors.has_error():
+            errors.remove()
             return None
 
+        # Datenbank erstellen, Gruppen und Stationen auslesen
         database = Database(settings)
         settings.read_groups(database)
         settings.read_stations(database)
-        if ec.has_error():
-            ec.show_messagebox()
+        if errors.has_error():
+            errors.remove()
             return None
 
-        attendees_table = AttendeesTable(folder, settings)
+        # Meldung auslesen
+        attendees_table = AttendeesTable(folder, settings, database)
         attendees_table.open()
-        if ec.has_error():
-            ec.show_messagebox()
-            return None
-
-        attendees_table.read_to_database(database)
-        if ec.has_error():
-            ec.show_messagebox()
+        if errors.has_error():
+            errors.remove()
             return None
 
         database.do_grouping()
-        if ec.has_error():
-            ec.show_messagebox()
+        if errors.has_error():
+            errors.remove()
             return None
 
         return Competition(folder, settings, database)

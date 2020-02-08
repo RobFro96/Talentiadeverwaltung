@@ -9,6 +9,7 @@ import coloredlogs
 
 from gui.main_form import ExitReason
 from initialization.competition_loader import CompetitionLoader
+from util.error_collector import ErrorCollector
 
 coloredlogs.install(fmt='%(asctime)s,%(msecs)d %(levelname)-5s '
                     '[%(filename)s:%(lineno)d] %(message)s',
@@ -32,9 +33,13 @@ def main(force_open=False):
         if not folder:
             return
 
+    errors = ErrorCollector()
     competition = competition_loader.load(folder)
-    if competition is None:
+    if (competition is None) or errors.has_error():
+        errors.show_messagebox()
         return
+    else:
+        errors.remove()
 
     reason = competition.open_gui(root)
     if reason == ExitReason.OPEN:

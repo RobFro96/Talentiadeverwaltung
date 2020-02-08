@@ -1,7 +1,7 @@
 import logging
 
-from database.database import Database
-from database.table_reader import TableReader
+from data.database import Database
+from data.table_reader import TableReader
 from util.column_range import ColumnRange
 from util.table import Table, ValueType
 
@@ -17,46 +17,38 @@ SETTINGS = {
     "attendees_required": {"cell": "B10", "type": ValueType.STRING_LIST},
     "clubs_template": {"cell": "B13", "type": ValueType.STRING},
     "clubs_output": {"cell": "B14", "type": ValueType.STRING},
-    "clubs_worksheet": {"cell": "B15", "type": ValueType.NUMBER},
-    "clubs_header": {"cell": "B16", "type": ValueType.NUMBER},
-    "clubs_columns": {"cell": "B17", "type": ValueType.COLUMN_RANGE},
-    "clubs_cell_clubname": {"cell": "B18", "type": ValueType.STRING},
+    "clubs_header": {"cell": "B15", "type": ValueType.NUMBER},
+    "clubs_columns": {"cell": "B16", "type": ValueType.COLUMN_RANGE},
+    "clubs_date_columns": {"cell": "B17", "type": ValueType.STRING_LIST},
+    "clubs_cell_clubname": {"cell": "B18", "type": ValueType.CELL},
     "age_classifier": {"cell": "B21", "type": ValueType.STRING},
     "group_sort_before": {"cell": "B22", "type": ValueType.STRING_LIST},
     "group_sort_after": {"cell": "B23", "type": ValueType.STRING_LIST},
     "groups_template": {"cell": "B26", "type": ValueType.STRING},
     "groups_output": {"cell": "B27", "type": ValueType.STRING},
-    "groups_worksheet": {"cell": "B28", "type": ValueType.NUMBER},
-    "groups_header": {"cell": "B29", "type": ValueType.NUMBER},
-    "groups_columns": {"cell": "B30", "type": ValueType.COLUMN_RANGE},
-    "groups_cell_groupname": {"cell": "B31", "type": ValueType.STRING},
-    "stations_template": {"cell": "B34", "type": ValueType.STRING},
-    "stations_output": {"cell": "B35", "type": ValueType.STRING},
-    "stations_header": {"cell": "B36", "type": ValueType.NUMBER},
-    "stations_columns": {"cell": "B37", "type": ValueType.COLUMN_RANGE},
-    "stations_cell_groupname": {"cell": "B38", "type": ValueType.STRING},
-    "values_template": {"cell": "B41", "type": ValueType.STRING},
-    "values_output": {"cell": "B42", "type": ValueType.STRING},
-    "values_header": {"cell": "B43", "type": ValueType.NUMBER},
-    "values_columns": {"cell": "B44", "type": ValueType.COLUMN_RANGE},
-    "values_cell_groupname": {"cell": "B45", "type": ValueType.STRING},
+    "groups_header": {"cell": "B28", "type": ValueType.NUMBER},
+    "groups_columns": {"cell": "B29", "type": ValueType.COLUMN_RANGE},
+    "groups_cell_groupname": {"cell": "B30", "type": ValueType.CELL},
+    "stations_template": {"cell": "B33", "type": ValueType.STRING},
+    "stations_output": {"cell": "B34", "type": ValueType.STRING},
+    "stations_header": {"cell": "B35", "type": ValueType.NUMBER},
+    "stations_columns": {"cell": "B36", "type": ValueType.COLUMN_RANGE},
+    "stations_cell_groupname": {"cell": "B37", "type": ValueType.STRING},
+    "values_template": {"cell": "B40", "type": ValueType.STRING},
+    "values_output": {"cell": "B41", "type": ValueType.STRING},
+    "values_header": {"cell": "B42", "type": ValueType.NUMBER},
+    "values_columns": {"cell": "B43", "type": ValueType.COLUMN_RANGE},
+    "values_cell_groupname": {"cell": "B44", "type": ValueType.STRING},
 }
 
-VALUE_ERRORS = {
-    ValueType.NUMBER: "Fehler beim Lesen der Einstellungstabelle. In Zelle %s wird eine Zahl erwartet.",
-    ValueType.COLUMN_RANGE: "Fehler beim Lesen der Einstellungstabelle. In Zelle %s wird ein Spaltenbereich erwartet.",
-    ValueType.STRING: "Fehler beim Lesen der Einstellungstabelle. Zelle %s ist leer.",
-    ValueType.STRING_LIST: "Fehler beim Lesen der Einstellungstabelle. Zelle %s ist leer."
-}
-
-GROUP_WORKSHEET = 2
+GROUP_WORKSHEET = 1
 GROUP_HEADER = 2
-GROUP_COLUMNS = "A-C"
+GROUP_COLUMNS = ColumnRange.from_string("A-C")
 GROUP_REQUIRED = ["Riegenname", "Altersklassen"]
 
-STATION_WORKSHEET = 3
+STATION_WORKSHEET = 2
 STATION_HEADER = 2
-STATION_COLUMNS = "A-B"
+STATION_COLUMNS = ColumnRange.from_string("A-B")
 STATION_REQUIRED = ["Station", "Kürzel"]
 
 
@@ -66,23 +58,21 @@ class SettingsTable(Table):
         self.settings = {}
 
     def open(self):
-        self.settings = {}
-        if not Table.open(self):
-            logging.error("Einstellungsdatei kann nicht geöffnet werden.")
-            return
+        try:
+            self.settings = {}
+            if not Table.open(self):
+                return
 
-        self.__read_settings()
+            self.__read_settings()
+        except:
+            logging.exception("Fehler beim Lesen der Einstellungsdatei.")
 
     def __read_settings(self):
         self.worksheet = self.workbook.worksheets[WORKSHEET]
 
         for value_name, value_property in SETTINGS.items():
-            self.settings[value_name], success = self.get_value(
+            self.settings[value_name] = self.get_value(
                 value_property["cell"], value_property["type"])
-
-            if not success:
-                logging.error(VALUE_ERRORS[value_property["type"]],
-                              value_property["cell"])
 
     def __getitem__(self, key):
         if key in self.settings:
@@ -90,19 +80,19 @@ class SettingsTable(Table):
         return None
 
     def read_groups(self, database: Database):
-        reader = TableReader(self) \
-            .set_worksheet_number(GROUP_WORKSHEET) \
-            .set_header_row(GROUP_HEADER) \
-            .set_columns(ColumnRange.from_string(GROUP_COLUMNS)) \
-            .set_required_columns(GROUP_REQUIRED)
-
-        database.read_group_table(reader)
+        try:
+            self.set_worksheet(GROUP_WORKSHEET)
+            reader = TableReader(self, GROUP_HEADER, GROUP_COLUMNS, GROUP_REQUIRED)
+            database.clear_groups()
+            reader.read(lambda row, row_data: database.append_group(row_data))
+        except:
+            logging.exception("Fehler beim Lesen der Gruppen aus der Einstellungsdatei.")
 
     def read_stations(self, database: Database):
-        reader = TableReader(self) \
-            .set_worksheet_number(STATION_WORKSHEET) \
-            .set_header_row(STATION_HEADER) \
-            .set_columns(ColumnRange.from_string(STATION_COLUMNS)) \
-            .set_required_columns(STATION_REQUIRED)
-
-        database.read_station_table(reader)
+        try:
+            self.set_worksheet(STATION_WORKSHEET)
+            reader = TableReader(self, STATION_HEADER, STATION_COLUMNS, STATION_REQUIRED)
+            database.clear_stations()
+            reader.read(lambda row, row_data: database.append_station(row_data))
+        except:
+            logging.exception("Fehler beim Lesen der Gruppen aus der Einstellungsdatei.")

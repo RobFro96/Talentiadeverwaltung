@@ -1,10 +1,8 @@
-import threading
-import time
 import tkinter
 import tkinter.ttk
 
 
-class ProgressTask(threading.Thread):
+class ProgressTask:
     def __init__(self, root):
         self.toplevel = tkinter.Toplevel(root)
 
@@ -24,19 +22,20 @@ class ProgressTask(threading.Thread):
         self.progress = tkinter.ttk.Progressbar(self.toplevel)
         self.progress.pack(fill="both")
 
-        threading.Thread.__init__(self)
-
     def set_title(self, title: str):
         self.toplevel.title(title)
 
     def set_label(self, text: str):
         self.label.config(text=text)
 
-    def set_progress(self, value: int, maximum: int):
-        self.progress["maximum"] = maximum
+    def set_value(self, value: int):
         self.progress["value"] = value
 
-    def run(self):
-        for i in range(10):
-            self.set_progress(i, 9)
-            time.sleep(.5)
+    def inc_value(self):
+        self.progress["value"] += 1
+
+    def set_maximum(self,  maximum: int):
+        self.progress["maximum"] = maximum
+
+    def close(self):
+        self.toplevel.destroy()

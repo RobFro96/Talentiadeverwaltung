@@ -1,8 +1,9 @@
 import logging
 import tkinter
 
-from database.database import Database
+from data.database import Database
 from gui.main_form import ExitReason, MainForm
+from gui.progress_task import ProgressTask
 from initialization.settings_table import SettingsTable
 from reports.club_report_table import ClubReportTable
 from reports.group_report_table import GroupReportTable
@@ -26,76 +27,69 @@ class Competition:
         return self.settings["competition_name"]
 
     def on_report_club(self) -> ErrorCollector:
-        ec = ErrorCollector()
+        errors = ErrorCollector()
 
-        table = ClubReportTable(self.folder, self.settings)
+        table = ClubReportTable(self.folder, self.settings, self.database)
         table.open()
-        if ec.has_error():
-            return ec
-
-        table.create(self.database)
-        if ec.has_error():
-            return ec
+        if errors.has_error():
+            return errors
 
         table.write()
-        if ec.has_error():
-            return ec
+        if errors.has_error():
+            return errors
 
         logging.info("Vereinsübersicht wurde erfolgreich erstellt.")
-        return ec
+        return errors
 
     def on_report_group(self) -> ErrorCollector:
-        ec = ErrorCollector()
+        errors = ErrorCollector()
 
-        table = GroupReportTable(self.folder, self.settings)
+        table = GroupReportTable(self.folder, self.settings, self.database)
         table.open()
-        if ec.has_error():
-            return ec
-
-        table.create(self.database)
-        if ec.has_error():
-            return ec
+        if errors.has_error():
+            return errors
 
         table.write()
-        if ec.has_error():
-            return ec
+        if errors.has_error():
+            return errors
 
         logging.info("Riegenübersicht wurde erfolgreich erstellt.")
-        return ec
+        return errors
 
-    def on_report_stations(self) -> ErrorCollector:
-        ec = ErrorCollector()
+    def on_report_stations(self, progress: ProgressTask = None) -> ErrorCollector:
+        errors = ErrorCollector()
 
-        table = StationReportTable(self.folder, self.settings)
+        table = StationReportTable(self.folder, self.settings, self.database, progress)
         table.open()
-        if ec.has_error():
-            return ec
-
-        table.create(self.database)
-        if ec.has_error():
-            return ec
+        if errors.has_error():
+            return errors
 
         table.write()
-        if ec.has_error():
-            return ec
+        if errors.has_error():
+            return errors
 
         logging.info("Stationszettel wurde erfolgreich erstellt.")
-        return ec
+        return errors
 
-    def on_report_values(self) -> ErrorCollector:
-        ec = ErrorCollector()
+    def on_report_values(self, progress: ProgressTask = None) -> ErrorCollector:
+        errors = ErrorCollector()
 
         for station in self.database.get_stations():
             for group in self.database.get_groups():
-                table = ValuesReportTable(self.folder, self.settings)
+                table = ValuesReportTable(self.folder, self.settings, self.database, station, group)
                 table.open()
-                table.create(self.database, station, group)
-                table.write()
-                if ec.has_error():
-                    return
+                if errors.has_error():
+                    return errors
 
-        if ec.has_error():
-            return ec
+                table.write()
+                if errors.has_error():
+                    return errors
+
+                if progress:
+                    progress.inc_value()
+
+        if errors.has_error():
+            return errors
 
         logging.info("Wertungszettel wurden erfolgreich erstellt.")
-        return ec
+        return errors

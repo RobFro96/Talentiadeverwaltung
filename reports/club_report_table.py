@@ -1,49 +1,40 @@
 import logging
 
-from database.database import Database
-from database.table_reader import TableReader
+from data.database import Database
+from data.table_reader import TableReader
 from initialization.settings_table import SettingsTable
 from util.table import Table
 
+TEMPLATE_SHEET_NAME = "Vorlage"
+
 
 class ClubReportTable(Table):
-    def __init__(self, competition_folder: str, settings: SettingsTable):
+    def __init__(self, competition_folder: str, settings: SettingsTable, database: Database):
         self.settings = settings
+        self.database = database
         self.table_reader: TableReader = None
-        Table.__init__(self, competition_folder,
-                       self.settings["clubs_template"])
+        Table.__init__(self, competition_folder, self.settings["clubs_template"])
 
-    def open(self):
-        if not Table.open(self):
-            logging.error("Vorlage der Vereinsübersicht %s kann nicht geöffnet werden.",
-                          self.filename)
-            return
+    def write(self, folder=None, filename=None) -> bool:
+        filename = filename or self.settings["clubs_output"]
 
-    def write(self):
-        if not Table.write(self, None, self.settings["clubs_output"]):
-            logging.error("Die Vereinsübersicht %s kann nicht gespeichert werden.",
-                          self.filename)
-            return
+        try:
+            self.table_reader = TableReader.from_settings(self, self.settings, "clubs")
+            for club in self.database.get_clubs():
+                self.__create_worksheet(club)
 
-    def create(self, database: Database,):
-        self.table_reader = TableReader(self).from_settings(
-            self.settings, "clubs", False)
+            self.remove_worksheet(TEMPLATE_SHEET_NAME)
 
-        for club in database.get_clubs():
-            self.__create_worksheet(club, database)
+            return Table.write(self, folder, filename)
+        except:
+            logging.exception("Fehler beim Erstellen der Vereinsübersicht.")
+            return False
 
-        self.workbook.remove_sheet(self.__get_template_sheet())
-
-    def __create_worksheet(self, club: str, database: Database):
-        self.worksheet = self.workbook.copy_worksheet(
-            self.__get_template_sheet())
+    def __create_worksheet(self, club: str):
+        self.copy_worksheet(TEMPLATE_SHEET_NAME)
         self.worksheet.title = club
-        self.table_reader.set_worksheet(self.worksheet)
 
-        data = database.get_club_overview(club)
+        data = self.database.get_club_overview(club)
         self.table_reader.write(data)
 
-        self.worksheet[self.settings["clubs_cell_clubname"]].value = club
-
-    def __get_template_sheet(self):
-        return self.workbook.worksheets[self.settings["clubs_worksheet"] - 1]
+        self.set_value(self.settings["clubs_cell_clubname"], club)

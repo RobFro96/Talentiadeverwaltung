@@ -14,6 +14,6 @@ logging.info("Hallo Welt!")
 logging.error("Test!")
 
 ec = ErrorCollector()
-logging.info("hi!")
+logging.info("hi! %s", "data")
 logging.error("Error!")
 ec.show_messagebox()

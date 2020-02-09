@@ -3,10 +3,10 @@ import logging
 from data.database import Database
 from data.database_groups import GROUP_NAME
 from data.database_stations import STATION_SHORT
-from util.table_reader import TableReader
 from gui.progress_task import ProgressTask
 from initialization.settings_table import SettingsTable
 from util.table import Table
+from util.table_reader import TableReader
 
 
 class StationReportTable(Table):
@@ -17,8 +17,7 @@ class StationReportTable(Table):
         self.progress = progress
         self.table_reader: TableReader = None
 
-        Table.__init__(self, competition_folder,
-                       self.settings["stations_template"])
+        Table.__init__(self, competition_folder, self.settings["stations_template"])
 
     def write(self, folder=None, filename=None) -> bool:
         filename = filename or self.settings["stations_output"]

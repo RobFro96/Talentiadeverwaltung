@@ -10,6 +10,7 @@ from reports.club_report_table import ClubReportTable
 from reports.group_report_table import GroupReportTable
 from reports.station_report_table import StationReportTable
 from reports.values_report_table import ValuesReportTable
+from scoring.scoring_table import ScoringTable
 from scoring.values_input_table import ValuesInputTable
 from util.error_collector import ErrorCollector
 
@@ -122,3 +123,18 @@ class Competition:
 
         logging.info("Wertungszettel wurden erfolgreich eingelesen.")
         return errors, matrix
+
+    def on_scoring_create(self, progress: ProgressTask = None) -> ErrorCollector:
+        errors = ErrorCollector()
+
+        table = ScoringTable(self.folder, self.settings, self.database, progress)
+        table.open()
+        if errors.has_error():
+            return errors
+
+        table.write()
+        if errors.has_error():
+            return errors
+
+        logging.info("Auswertung wurde erfolgreich erstellt.")
+        return errors

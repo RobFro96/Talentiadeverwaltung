@@ -137,6 +137,16 @@ class MainForm:
 
     def on_scoring_create(self, *_):
         logging.info("Auswertung erstellen")
+        progress = ProgressTask(self.root)
+        progress.set_label(REFRESH_SCORING_PROGRESS_LABEL)
+        progress.set_maximum(len(self.competition.database.get_sclasses()))
+
+        def process():
+            errors = self.competition.on_scoring_create(progress)
+            progress.close()
+            errors.show_messagebox()
+
+        threading.Thread(target=process).start()
 
     def __set_from_data(self):
         self.login_tab.update_table(

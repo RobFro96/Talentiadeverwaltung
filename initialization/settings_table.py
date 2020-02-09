@@ -42,7 +42,12 @@ SETTINGS = {
     "values_input_file": {"cell": "B47", "type": ValueType.STRING},
     "values_input_header": {"cell": "B48", "type": ValueType.NUMBER},
     "values_input_columns": {"cell": "B49", "type": ValueType.COLUMN_RANGE},
-    "values_input_required": {"cell": "B50", "type": ValueType.STRING_LIST}
+    "values_input_required": {"cell": "B50", "type": ValueType.STRING_LIST},
+    "scoring_template": {"cell": "B53", "type": ValueType.STRING},
+    "scoring_output": {"cell": "B54", "type": ValueType.STRING},
+    "scoring_header": {"cell": "B55", "type": ValueType.NUMBER},
+    "scoring_columns": {"cell": "B56", "type": ValueType.COLUMN_RANGE},
+    "scoring_required": {"cell": "B57", "type": ValueType.STRING_LIST}
 }
 
 GROUP_WORKSHEET = 1
@@ -54,6 +59,11 @@ STATION_WORKSHEET = 2
 STATION_HEADER = 2
 STATION_COLUMNS = ColumnRange.from_string("A-C")
 STATION_REQUIRED = ["Station", "Kürzel", "Spalten"]
+
+SCLASS_WORKSHEET = 3
+SCLASS_HEADER = 2
+SCLASS_COLUMNS = ColumnRange.from_string("A-B")
+SCLASS_REQUIRED = ["Tabellenblatt", "Altersklassen"]
 
 
 class SettingsTable(Table):
@@ -99,4 +109,13 @@ class SettingsTable(Table):
             database.clear_stations()
             reader.read(lambda row, row_data: database.append_station(row_data))
         except:
-            logging.exception("Fehler beim Lesen der Gruppen aus der Einstellungsdatei.")
+            logging.exception("Fehler beim Lesen der Stationen aus der Einstellungsdatei.")
+
+    def read_sclasses(self, database: Database):
+        try:
+            self.set_worksheet(SCLASS_WORKSHEET)
+            reader = TableReader(self, SCLASS_HEADER, SCLASS_COLUMNS, SCLASS_REQUIRED)
+            database.clear_sclasses()
+            reader.read(lambda row, row_data: database.append_sclass(row_data))
+        except:
+            logging.exception("Fehler beim Lesen der Wertungsklassen aus der Einstellungsdatei.")

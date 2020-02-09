@@ -5,15 +5,17 @@ import typing
 from data.database_attendees import GROUP, DatabaseAttendees
 from data.database_groups import (GROUP_AGE_CLASSES, GROUP_LIMIT, GROUP_NAME,
                                   GROUP_SIZE, DatabaseGroups)
+from data.database_sclasses import SCLASS_AGE_CLASSES, DatabaseSClasses
 from data.database_stations import DatabaseStations
 
 
-class Database(DatabaseGroups, DatabaseStations, DatabaseAttendees):
+class Database(DatabaseGroups, DatabaseStations, DatabaseAttendees, DatabaseSClasses):
     def __init__(self, settings):
         self.settings = settings
         DatabaseGroups.__init__(self)
         DatabaseStations.__init__(self)
         DatabaseAttendees.__init__(self)
+        DatabaseSClasses.__init__(self)
 
     def do_grouping(self):
         self.sort_attendees(self.settings["group_sort_before"])
@@ -85,3 +87,9 @@ class Database(DatabaseGroups, DatabaseStations, DatabaseAttendees):
     def save_as_json(cls, filename, obj):
         with open(filename, "w", encoding="utf8") as json_file:
             json_file.write(repr(obj))
+
+    def get_attendees_in_sclass(self, sclass):
+        def fiter_func(attendee):
+            return re.match(sclass[SCLASS_AGE_CLASSES], self.get_age_class(attendee))
+
+        return list(filter(fiter_func, self.get_attending()))

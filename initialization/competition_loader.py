@@ -49,6 +49,7 @@ class CompetitionLoader:
         database = Database(settings)
         settings.read_groups(database)
         settings.read_stations(database)
+        settings.read_sclasses(database)
         if errors.has_error():
             errors.remove()
             return None

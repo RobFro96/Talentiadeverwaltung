@@ -2,6 +2,7 @@ import typing
 
 STATION_NAME = "Station"
 STATION_SHORT = "Kürzel"
+STATION_COLUMNS = "Spalten"
 
 
 class DatabaseStations:
@@ -16,3 +17,11 @@ class DatabaseStations:
 
     def get_stations(self):
         return self.stations
+
+    def get_all_station_scoring_columns(self):
+        result = []
+        for station in self.stations:
+            columns_list = [element.strip() for element in str(station[STATION_COLUMNS]).split(',')]
+            result += columns_list
+
+        return result

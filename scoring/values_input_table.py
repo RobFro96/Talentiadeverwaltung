@@ -3,7 +3,7 @@ import typing
 
 from data.database import Database
 from data.database_groups import GROUP_NAME
-from data.database_stations import STATION_SHORT
+from data.database_stations import STATION_COLUMNS, STATION_SHORT
 from initialization.settings_table import SettingsTable
 from util.table import Table
 from util.table_reader import TableReader
@@ -30,7 +30,8 @@ class ValuesInputTable(Table):
 
         try:
             reader = TableReader.from_settings(self, self.settings, "values_input")
-            reader.read(self.process_row)
+            if not reader.read(self.process_row):
+                self.status = logging.ERROR
         except:
             logging.exception("Fehler beim Auslesen der Daten aus der Tabelle %s", self.filename)
             self.status = logging.ERROR
@@ -46,5 +47,5 @@ class ValuesInputTable(Table):
             return
 
         for key, value in row_data.items():
-            if key not in self.settings["values_input_non_value_columns"]:
+            if key in self.station[STATION_COLUMNS]:
                 attendee[key] = value

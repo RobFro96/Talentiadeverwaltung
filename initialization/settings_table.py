@@ -42,8 +42,7 @@ SETTINGS = {
     "values_input_file": {"cell": "B47", "type": ValueType.STRING},
     "values_input_header": {"cell": "B48", "type": ValueType.NUMBER},
     "values_input_columns": {"cell": "B49", "type": ValueType.COLUMN_RANGE},
-    "values_input_required": {"cell": "B50", "type": ValueType.STRING_LIST},
-    "values_input_non_value_columns": {"cell": "B51", "type": ValueType.STRING_LIST}
+    "values_input_required": {"cell": "B50", "type": ValueType.STRING_LIST}
 }
 
 GROUP_WORKSHEET = 1
@@ -53,8 +52,8 @@ GROUP_REQUIRED = ["Riegenname", "Altersklassen"]
 
 STATION_WORKSHEET = 2
 STATION_HEADER = 2
-STATION_COLUMNS = ColumnRange.from_string("A-B")
-STATION_REQUIRED = ["Station", "Kürzel"]
+STATION_COLUMNS = ColumnRange.from_string("A-C")
+STATION_REQUIRED = ["Station", "Kürzel", "Spalten"]
 
 
 class SettingsTable(Table):

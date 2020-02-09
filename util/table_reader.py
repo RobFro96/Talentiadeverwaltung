@@ -29,7 +29,7 @@ class TableReader:
         self.headers = self.get_header()
 
         if not self.check_required_columns():
-            return
+            return False
 
         row = self.header_row + 1
         success = True
@@ -41,6 +41,8 @@ class TableReader:
                 line_callback(row, row_data)
 
             row += 1
+
+        return True
 
     def get_header(self):
         return [str(self.table.worksheet.cell(self.header_row, col).value).strip()

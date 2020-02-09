@@ -35,10 +35,10 @@ class MatrixTab:
 
     def get_headers_and_sizes(self):
         headers = [FIRST_CELL]
-        sizes = [100]
+        sizes = [150]
         for group in self.database.get_groups():
             headers.append(group[GROUP_NAME])
-            sizes.append(50)
+            sizes.append(40)
         return headers, sizes
 
     def dummy_fill(self):

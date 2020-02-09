@@ -100,6 +100,8 @@ class Competition:
         errors = ErrorCollector()
         matrix = []
 
+        self.database.remove_all_scoring_values()
+
         for station in self.database.get_stations():
             matrix_line = []
             for group in self.database.get_groups():
@@ -116,7 +118,7 @@ class Competition:
             matrix.append(matrix_line)
 
         if errors.has_error():
-            return errors
+            return errors, matrix
 
         logging.info("Wertungszettel wurden erfolgreich eingelesen.")
         return errors, matrix

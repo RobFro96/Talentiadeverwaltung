@@ -123,7 +123,7 @@ class DatabaseAttendees:
                     return False
             return True
 
-        result = list(filter(filter_func, self.attendees))
+        result = list(filter(filter_func, self.get_attending()))
 
         if len(result) != 1:
             return None

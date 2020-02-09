@@ -74,3 +74,14 @@ class Database(DatabaseGroups, DatabaseStations, DatabaseAttendees):
 
     def get_process_steps(self, extra_groups=0, extra_stations=0):
         return (len(self.groups) + extra_groups) * (len(self.stations) + extra_stations)
+
+    def remove_all_scoring_values(self):
+        for col in self.get_all_station_scoring_columns():
+            for attendee in self.get_attending():
+                if col in attendee:
+                    attendee.pop(col)
+
+    @classmethod
+    def save_as_json(cls, filename, obj):
+        with open(filename, "w", encoding="utf8") as json_file:
+            json_file.write(repr(obj))

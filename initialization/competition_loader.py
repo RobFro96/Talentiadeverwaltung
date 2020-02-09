@@ -1,3 +1,9 @@
+"""
+Talentiadeverwaltung für Sportwettkämpfe der Ruderjugend Sachsen
+Programm zum Einlesen, Bearbeiten und Abspeichern von Excel-Tabellen
+von Robert Fromm (Ruderclub Eilenburg e. V.), Februar 2020
+Email: robert_fromm@web.de
+"""
 import logging
 import os
 import tkinter
@@ -13,7 +19,16 @@ FOLDER_DIALOG_TITLE = "Ordner der Veranstaltung auswählen"
 
 
 class CompetitionLoader:
-    def read_last_path(self) -> str:
+    """Klasse zum Erstellen einer Anwendung
+    """
+
+    @classmethod
+    def read_last_path(cls) -> str:
+        """Lesen der verstecken Datei, die den Pfad zur zuletzt geöffneten Veranstaltung enthält
+
+        Returns:
+            str: Pfad der letzten Veranstaltung
+        """
         if not os.path.exists(LAST_COMP_FILE):
             logging.warning("Datei .last_competition exisitiert nicht.")
             return None
@@ -25,12 +40,30 @@ class CompetitionLoader:
             logging.exception("Fehler beim Lesen der Datei .last_competition.")
             return None
 
-    def open_dialog(self, initial_dir: str) -> str:
+    @classmethod
+    def open_dialog(cls, initial_dir: str) -> str:
+        """Öffnen des Dialogfensters zum Öffnen einer neuen Veranstaltung
+
+        Args:
+            initial_dir (str): Ordner mit dem das Dialogfenster startet
+
+        Returns:
+            str: Ausgewählter Ordner
+        """
         return tkinter.filedialog.askdirectory(
             initialdir=initial_dir,
             title=FOLDER_DIALOG_TITLE)
 
-    def load(self, folder: str) -> Competition:
+    @classmethod
+    def load(cls, folder: str) -> Competition:
+        """Laden der Veranstaltung
+
+        Args:
+            folder (str): Ordner der Veranstaltung
+
+        Returns:
+            Competition: Veranstaltung
+        """
         errors = ErrorCollector()
 
         # Ordner überprüfen

@@ -1,3 +1,9 @@
+"""
+Talentiadeverwaltung für Sportwettkämpfe der Ruderjugend Sachsen
+Programm zum Einlesen, Bearbeiten und Abspeichern von Excel-Tabellen
+von Robert Fromm (Ruderclub Eilenburg e. V.), Februar 2020
+Email: robert_fromm@web.de
+"""
 import logging
 import tkinter
 import typing
@@ -16,20 +22,49 @@ from util.error_collector import ErrorCollector
 
 
 class Competition:
+    """Veranstaltung: Hauptklasse der Anwendung.
+    Alle Daten, Einstellungen und Aktionen werden in dieser Klasse miteinander verknüpft.
+    """
+
     def __init__(self, folder: str, settings: SettingsTable, database: Database):
+        """Konstruktor.
+
+        Args:
+            folder (str): Ordner der Veranstaltung
+            settings (SettingsTable): Einstellungen
+            database (Database): Datenbank
+        """
         self.folder = folder
         self.settings = settings
         self.database = database
         self.main_form: MainForm = None
 
     def open_gui(self, root: tkinter.Tk) -> ExitReason:
+        """Öffnen des Fensters der GUI
+
+        Args:
+            root (tkinter.Tk): tkinter-Root
+
+        Returns:
+            ExitReason: Grund warum Fenster geschlossen wurde.
+        """
         self.main_form = MainForm(self)
         return self.main_form.open(root)
 
-    def get_name(self):
+    def get_name(self) -> str:
+        """Name der Veranstaltung
+
+        Returns:
+            str: Name
+        """
         return self.settings["competition_name"]
 
     def on_report_club(self) -> ErrorCollector:
+        """Erstellen der Vereinsübersicht
+
+        Returns:
+            ErrorCollector: Fehler
+        """
         errors = ErrorCollector()
 
         table = ClubReportTable(self.folder, self.settings, self.database)
@@ -45,6 +80,11 @@ class Competition:
         return errors
 
     def on_report_group(self) -> ErrorCollector:
+        """Erstellen der Riegenübersicht
+
+        Returns:
+            ErrorCollector: Fehler
+        """
         errors = ErrorCollector()
 
         table = GroupReportTable(self.folder, self.settings, self.database)
@@ -60,6 +100,14 @@ class Competition:
         return errors
 
     def on_report_stations(self, progress: ProgressTask = None) -> ErrorCollector:
+        """Erstellen der Stationszettel
+
+        Args:
+            progress (ProgressTask, optional): Fortschrittsanzeige. Defaults to None.
+
+        Returns:
+            ErrorCollector: Fehler
+        """
         errors = ErrorCollector()
 
         table = StationReportTable(self.folder, self.settings, self.database, progress)
@@ -75,6 +123,14 @@ class Competition:
         return errors
 
     def on_report_values(self, progress: ProgressTask = None) -> ErrorCollector:
+        """Erstellen der Wertungstabellen
+
+        Args:
+            progress (ProgressTask, optional): Fortschrittsanzeige. Defaults to None.
+
+        Returns:
+            ErrorCollector: Fehler
+        """
         errors = ErrorCollector()
 
         for station in self.database.get_stations():
@@ -98,6 +154,15 @@ class Competition:
         return errors
 
     def on_scoring_refresh(self, progress: ProgressTask = None) -> (ErrorCollector, typing.List):
+        """Einlesen der Wertungstabellen
+
+         Args:
+            progress (ProgressTask, optional): Fortschrittsanzeige. Defaults to None.
+
+        Returns:
+            ErrorCollector: Fehler
+            typing.List: Matrix
+        """
         errors = ErrorCollector()
         matrix = []
 
@@ -125,6 +190,14 @@ class Competition:
         return errors, matrix
 
     def on_scoring_create(self, progress: ProgressTask = None) -> ErrorCollector:
+        """Auswertung erstellen.
+
+        Args:
+            progress (ProgressTask, optional): Fortschrittsanzeige. Defaults to None.
+
+        Returns:
+            ErrorCollector: Fehler
+        """
         errors = ErrorCollector()
 
         table = ScoringTable(self.folder, self.settings, self.database, progress)

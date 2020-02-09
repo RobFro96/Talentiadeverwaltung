@@ -1,3 +1,9 @@
+"""
+Talentiadeverwaltung für Sportwettkämpfe der Ruderjugend Sachsen
+Programm zum Einlesen, Bearbeiten und Abspeichern von Excel-Tabellen
+von Robert Fromm (Ruderclub Eilenburg e. V.), Februar 2020
+Email: robert_fromm@web.de
+"""
 import logging
 import tkinter.messagebox
 
@@ -9,22 +15,39 @@ ERROR_MBOX_PREFIX = "\u274C "
 
 
 class ErrorCollector(logging.Handler):
+    """Klasse zum Sammeln von Logging-Nachrichten
+    """
+
     def __init__(self):
+        """Konstruktor.
+        """
         logging.Handler.__init__(self)
         self.entries = []
         self.global_state = logging.INFO
         logging.getLogger().addHandler(self)
 
     def emit(self, record: logging.LogRecord):
+        """Wenn einen Logging-Nachricht kommt
+
+        Args:
+            record (logging.LogRecord): Logging-Nachricht
+        """
         self.entries.append(record)
 
         if record.levelno > self.global_state:
             self.global_state = record.levelno
 
     def has_error(self):
+        """Gitb an, ob Fehlermeldungen aufgenommen wurden.
+
+        Returns:
+            bool: True, wenn Fehlermeldung existiert.
+        """
         return self.global_state >= logging.ERROR
 
     def show_messagebox(self):
+        """Anzeigen einer tkinter-Messagebox
+        """
         self.remove()
 
         if not self.entries:
@@ -55,4 +78,6 @@ class ErrorCollector(logging.Handler):
         mbox(title, text)
 
     def remove(self):
+        """Muss ausgeführt werden, damit Collector deaktiviert werden kann.
+        """
         logging.getLogger().removeHandler(self)

@@ -1,5 +1,11 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
+"""
+Talentiadeverwaltung für Sportwettkämpfe der Ruderjugend Sachsen
+Programm zum Einlesen, Bearbeiten und Abspeichern von Excel-Tabellen
+von Robert Fromm (Ruderclub Eilenburg e. V.), Februar 2020
+Email: robert_fromm@web.de
+"""
 
 import logging
 import os
@@ -17,30 +23,36 @@ coloredlogs.install(fmt='%(asctime)s,%(msecs)d %(levelname)-5s '
                     level=logging.DEBUG)
 
 ICON_PATH = "util/icon.ico"
-SETTINGS_FILE = "settings.json"
 
 
 def main(force_open=False):
+    """Hauptfunktion
+
+    Args:
+        force_open (bool, optional): True, wenn Ordnerdialog erzwungen werden soll. Defaults to False.
+    """
+    # TKinter initialisieren
     root = tkinter.Tk()
     root.iconbitmap(ICON_PATH)
     root.withdraw()
 
-    competition_loader = CompetitionLoader()
-
-    folder = competition_loader.read_last_path()
+    # Ordner abfragen, ggf. Dialog öffnen
+    folder = CompetitionLoader.read_last_path()
     if not folder or force_open:
-        folder = competition_loader.open_dialog(os.getcwd())
+        folder = CompetitionLoader.open_dialog(os.getcwd())
         if not folder:
             return
 
+    # Veranstaltung initialisieren
     errors = ErrorCollector()
-    competition = competition_loader.load(folder)
+    competition = CompetitionLoader.load(folder)
     if (competition is None) or errors.has_error():
         errors.show_messagebox()
         return
     else:
         errors.remove()
 
+    # GUI öffnen, Aktionen beim Beenden
     reason = competition.open_gui(root)
     if reason == ExitReason.OPEN:
         main(True)

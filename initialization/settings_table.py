@@ -1,4 +1,11 @@
+"""
+Talentiadeverwaltung für Sportwettkämpfe der Ruderjugend Sachsen
+Programm zum Einlesen, Bearbeiten und Abspeichern von Excel-Tabellen
+von Robert Fromm (Ruderclub Eilenburg e. V.), Februar 2020
+Email: robert_fromm@web.de
+"""
 import logging
+import typing
 
 from data.database import Database
 from util.column_range import ColumnRange
@@ -67,11 +74,21 @@ SCLASS_REQUIRED = ["Tabellenblatt", "Altersklassen"]
 
 
 class SettingsTable(Table):
+    """Einstellungstabelle
+    """
+
     def __init__(self, competition_folder: str):
+        """Konstruktor.
+
+        Args:
+            competition_folder (str): Ordner der Veranstaltung
+        """
         Table.__init__(self, competition_folder, FILENAME)
         self.settings = {}
 
     def open(self):
+        """Öffnen der Einstellungen. Auslesen der Einstellungen
+        """
         try:
             self.settings = {}
             if not Table.open(self):
@@ -82,18 +99,33 @@ class SettingsTable(Table):
             logging.exception("Fehler beim Lesen der Einstellungsdatei.")
 
     def __read_settings(self):
+        """Auslesen der Einstellungen mit Hilfe der Konstanten SETTINGS
+        """
         self.worksheet = self.workbook.worksheets[WORKSHEET]
 
         for value_name, value_property in SETTINGS.items():
             self.settings[value_name] = self.get_value(
                 value_property["cell"], value_property["type"])
 
-    def __getitem__(self, key):
+    def __getitem__(self, key) -> typing.Any:
+        """Mit [] kann auf eine Einstellung zugegriffen.
+
+        Args:
+            key (str): Schlüssel
+
+        Returns:
+            typing.Any: Einstellung
+        """
         if key in self.settings:
             return self.settings[key]
         return None
 
     def read_groups(self, database: Database):
+        """Auslesen der Gruppen in die Datenabk
+
+        Args:
+            database (Database): Datenbank
+        """
         try:
             self.set_worksheet(GROUP_WORKSHEET)
             reader = TableReader(self, GROUP_HEADER, GROUP_COLUMNS, GROUP_REQUIRED)
@@ -103,6 +135,11 @@ class SettingsTable(Table):
             logging.exception("Fehler beim Lesen der Gruppen aus der Einstellungsdatei.")
 
     def read_stations(self, database: Database):
+        """Auslesen der Stationen in die Datenbanl
+
+        Args:
+            database (Database): Datenbank
+        """
         try:
             self.set_worksheet(STATION_WORKSHEET)
             reader = TableReader(self, STATION_HEADER, STATION_COLUMNS, STATION_REQUIRED)
@@ -112,6 +149,11 @@ class SettingsTable(Table):
             logging.exception("Fehler beim Lesen der Stationen aus der Einstellungsdatei.")
 
     def read_sclasses(self, database: Database):
+        """Auslesen der Wertungsklassen in die Datenbank
+
+        Args:
+            database (Database): Datenbank
+        """
         try:
             self.set_worksheet(SCLASS_WORKSHEET)
             reader = TableReader(self, SCLASS_HEADER, SCLASS_COLUMNS, SCLASS_REQUIRED)

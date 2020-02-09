@@ -1,3 +1,9 @@
+"""
+Talentiadeverwaltung für Sportwettkämpfe der Ruderjugend Sachsen
+Programm zum Einlesen, Bearbeiten und Abspeichern von Excel-Tabellen
+von Robert Fromm (Ruderclub Eilenburg e. V.), Februar 2020
+Email: robert_fromm@web.de
+"""
 import tkinter
 
 FILE_MENU = "Veranstaltung"
@@ -15,7 +21,15 @@ SCORING_CREATE = "Auswertung erstellen"
 
 
 class Menu:
+    """Menü-Leiste der MainForm
+    """
+
     def __init__(self, main_form):
+        """Konstruktor
+
+        Args:
+            main_form (MainForm): MainForm
+        """
         from gui.main_form import MainForm
         self.main_form: MainForm = main_form
         self.menu = None
@@ -24,6 +38,8 @@ class Menu:
         self.scoring_menu = None
 
     def create(self):
+        """Erstellen des Menüs
+        """
         self.menu = tkinter.Menu(self.main_form.root)
         self.main_form.root.config(menu=self.menu)
 

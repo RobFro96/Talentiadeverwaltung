@@ -7,6 +7,7 @@ import tkinter.ttk
 from gui.age_tab import AgeTab
 from gui.group_tab import GroupTab
 from gui.login_tab import LoginTab
+from gui.matrix_tab import MatrixTab
 from gui.menu import Menu
 from gui.progress_task import ProgressTask
 
@@ -34,6 +35,7 @@ class MainForm:
         self.login_tab: LoginTab = None
         self.age_tab: AgeTab = None
         self.group_tab: GroupTab = None
+        self.matrix_tab: MatrixTab = None
 
     def open(self, root: tkinter.Tk) -> ExitReason:
         self.root = root
@@ -57,6 +59,9 @@ class MainForm:
 
         self.group_tab = GroupTab(self)
         self.group_tab.create()
+
+        self.matrix_tab = MatrixTab(self, self.competition.database)
+        self.matrix_tab.create()
 
         self.__set_from_data()
 
@@ -126,6 +131,7 @@ class MainForm:
             errors, matrix = self.competition.on_scoring_refresh(progress)
             progress.close()
             errors.show_messagebox()
+            self.matrix_tab.update_table(matrix)
 
         threading.Thread(target=process).start()
 

@@ -11,7 +11,6 @@ class GuiTable:
 
         self.treeview.tag_configure("bold", font=(None, 9, "bold"))
 
-
     def update_headers(self, headers, widths):
         self.treeview.grid_remove()
         self.treeview.delete(*self.treeview.get_children())
@@ -29,10 +28,9 @@ class GuiTable:
 
     def grid(self, *args, **kwargs):
         self.treeview.grid(*args, **kwargs)
-    
+
     def grid_vsb(self, *args, **kwargs):
         self.vsb.grid(*args, **kwargs)
-
 
     def update(self, data, tags={}):
         self.treeview.delete(*self.treeview.get_children())

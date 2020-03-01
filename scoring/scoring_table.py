@@ -72,3 +72,4 @@ class ScoringTable(Table):
 
         data = self.database.get_attendees_in_sclass(sclass)
         self.table_reader.write(data)
+        self.set_footer(settings=self.settings, center="Auswertung")

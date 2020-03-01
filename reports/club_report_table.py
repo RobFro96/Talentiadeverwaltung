@@ -68,3 +68,4 @@ class ClubReportTable(Table):
         self.table_reader.write(data)
 
         self.set_value(self.settings["clubs_cell_clubname"], club)
+        self.set_footer(settings=self.settings, center="Vereinsübersicht")

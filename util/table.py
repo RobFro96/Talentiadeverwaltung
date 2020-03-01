@@ -372,3 +372,14 @@ class Table:
             return
 
         self.worksheet.cell(*cell.get(), value)
+
+    def set_footer(self, left=None, center=None, right=None, settings=None):
+        if not left and settings:
+            left = settings["competition_name"]
+
+        if not right and settings:
+            right = settings["competition_date"]
+
+        self.worksheet.oddHeader.left.text = left
+        self.worksheet.oddHeader.center.text = center
+        self.worksheet.oddHeader.right.text = right

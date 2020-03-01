@@ -52,6 +52,8 @@ def main(force_open=False):
     else:
         errors.remove()
 
+    CompetitionLoader.write_last_path(competition.folder)
+
     # GUI öffnen, Aktionen beim Beenden
     reason = competition.open_gui(root)
     if reason == ExitReason.OPEN:

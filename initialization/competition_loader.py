@@ -41,6 +41,15 @@ class CompetitionLoader:
             return None
 
     @classmethod
+    def write_last_path(cls, path: str):
+        try:
+            with open(LAST_COMP_FILE, "w", encoding="utf-8") as file:
+                file.write(path)
+        except IOError:
+            logging.exception("Fehler beim Schreiben der Datei .last_competition.")
+            return None
+
+    @classmethod
     def open_dialog(cls, initial_dir: str) -> str:
         """Öffnen des Dialogfensters zum Öffnen einer neuen Veranstaltung
 

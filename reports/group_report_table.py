@@ -69,3 +69,4 @@ class GroupReportTable(Table):
         self.table_reader.write(data)
 
         self.set_value(self.settings["groups_cell_groupname"], str(group[GROUP_NAME]))
+        self.set_footer(settings=self.settings, center="Riegenübersicht")

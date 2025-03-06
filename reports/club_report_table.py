@@ -64,6 +64,7 @@ class ClubReportTable(Table):
         self.copy_worksheet(TEMPLATE_SHEET_NAME)
         self.worksheet.title = club
 
+        self.database.sort_attendees(["ID"])
         data = self.database.get_club_overview(club)
         self.table_reader.write(data)
 

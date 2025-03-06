@@ -1,0 +1,62 @@
+REM  *****  BASIC  *****
+
+Sub Main
+
+End Sub
+
+
+sub Talentiade
+rem ----------------------------------------------------------------------
+rem define variables
+dim document   as object
+dim dispatcher as object
+rem ----------------------------------------------------------------------
+rem get access to the document
+document   = ThisComponent.CurrentController.Frame
+dispatcher = createUnoService("com.sun.star.frame.DispatchHelper")
+
+rem ----------------------------------------------------------------------
+dim args1(0) as new com.sun.star.beans.PropertyValue
+args1(0).Name = "ToPoint"
+args1(0).Value = "$A$4:$AF$53"
+
+dispatcher.executeDispatch(document, ".uno:GoToCell", "", 0, args1())
+
+rem ----------------------------------------------------------------------
+rem dispatcher.executeDispatch(document, ".uno:DataSort", "", 0, Array())
+
+rem ----------------------------------------------------------------------
+rem dispatcher.executeDispatch(document, ".uno:DataSort", "", 0, Array())
+
+rem ----------------------------------------------------------------------
+dim args4(9) as new com.sun.star.beans.PropertyValue
+args4(0).Name = "ByRows"
+args4(0).Value = true
+args4(1).Name = "HasHeader"
+args4(1).Value = false
+args4(2).Name = "CaseSensitive"
+args4(2).Value = false
+args4(3).Name = "NaturalSort"
+args4(3).Value = false
+args4(4).Name = "IncludeAttribs"
+args4(4).Value = true
+args4(5).Name = "UserDefIndex"
+args4(5).Value = 0
+args4(6).Name = "Col1"
+args4(6).Value = 31
+args4(7).Name = "Ascending1"
+args4(7).Value = false
+args4(8).Name = "IncludeComments"
+args4(8).Value = false
+args4(9).Name = "IncludeImages"
+args4(9).Value = true
+
+dispatcher.executeDispatch(document, ".uno:DataSort", "", 0, args4())
+
+rem ----------------------------------------------------------------------
+doc = ThisComponent
+sheet = doc.CurrentController.ActiveSheet
+range = sheet.getCellRangeByName("F1:AD1")
+range.Columns.isVisible = False
+
+end sub
